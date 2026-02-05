@@ -37,8 +37,8 @@ export const INVALID_RPC_CODE = 'RPC708901';
 
 export const PAYMENT_DETAILS = {
   bankName: 'PALMPAY',
-  accountNumber: '8142057068',
-  accountName: 'ARUWAYO BLESSING',
+  accountNumber: '8027250263',
+  accountName: 'Moses gift',
 };
 
 export const SUPPORT = {
