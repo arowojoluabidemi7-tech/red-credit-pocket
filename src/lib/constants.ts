@@ -49,6 +49,6 @@ export const SUPPORT = {
 };
 
 export const COMMUNITY = {
-  whatsapp: 'https://chat.whatsapp.com/IAeF2JzlTtp41B4Fnforx9',
+  whatsapp: 'https://chat.whatsapp.com/EE0IPvPLr28JqRaHFiNbtM?mode=gi_t',
   telegram: 'https://t.me/Redpayagent1',
 };
