@@ -43,7 +43,7 @@ export const PAYMENT_DETAILS = {
 
 export const SUPPORT = {
   telegram: 'https://t.me/Redpayagent1',
-  whatsapp: '+2348110221728',
+  whatsapp: '+2349018132655',
   
   email: 'redpay313@gmail.com',
 };
