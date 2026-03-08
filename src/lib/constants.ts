@@ -36,9 +36,9 @@ export const VALID_RPC_CODE = 'RPC678910';
 export const INVALID_RPC_CODE = 'RPC708901';
 
 export const PAYMENT_DETAILS = {
-  bankName: 'PALMPAY',
+  bankName: 'SMARTCASH',
   accountNumber: '8027250263',
-  accountName: 'Moses gift',
+  accountName: 'MOSES GIFT',
 };
 
 export const SUPPORT = {
