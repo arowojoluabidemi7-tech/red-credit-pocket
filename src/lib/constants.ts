@@ -37,7 +37,7 @@ export const INVALID_RPC_CODE = 'RPC708901';
 
 export const PAYMENT_DETAILS = {
   bankName: 'SMARTCASH',
-  accountNumber: '8027250263',
+  accountNumber: '7055968093',
   accountName: 'MOSES GIFT',
 };
 
