@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/Logo';
@@ -9,6 +9,7 @@ const Welcome: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const user = location.state?.user;
+  const [displayBalance, setDisplayBalance] = useState(0);
 
   const country = COUNTRIES.find(c => c.code === user?.country);
   const currency = country?.currency || '₦';
@@ -16,6 +17,28 @@ const Welcome: React.FC = () => {
   const formatCurrency = (amount: number) => {
     return `${currency}${amount.toLocaleString()}`;
   };
+
+  useEffect(() => {
+    const duration = 2200;
+    const start = performance.now();
+    const from = 0;
+    const to = WELCOME_BONUS;
+
+    let raf: number;
+    const animate = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      const current = Math.floor(from + (to - from) * easeOutQuart);
+      setDisplayBalance(current);
+      if (progress < 1) {
+        raf = requestAnimationFrame(animate);
+      }
+    };
+
+    raf = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-12">
