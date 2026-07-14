@@ -6,25 +6,31 @@ import { useAuth } from '@/contexts/AuthContext';
 import { storage } from '@/lib/store';
 
 import { COUNTRIES, CLAIM_AMOUNT, CLAIM_INTERVAL } from '@/lib/constants';
-import { 
-  Wallet, 
-  Gift, 
-  ShoppingBag, 
-  Radio, 
-  Users, 
-  Clock, 
+import {
+  Wallet,
+  Gift,
+  ShoppingBag,
+  Radio,
+  Users,
+  Clock,
   Headphones,
   Send,
   Video,
-  
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import cashInBanner from '@/assets/cash-in-banner.jpg';
+import earningBanner from '@/assets/earning-banner.jpg';
+
 
 const Dashboard: React.FC = () => {
   const { user, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [canClaim, setCanClaim] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [showBalance, setShowBalance] = useState(true);
+
 
   const country = COUNTRIES.find(c => c.code === user?.country);
   const currency = country?.currency || '₦';
@@ -105,19 +111,27 @@ const Dashboard: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <Logo size="sm" />
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={handleLogout} 
-              className="w-10 h-10 rounded-full border-2 border-primary flex items-center justify-center bg-card"
-            >
-              <span className="text-primary font-bold text-sm">RP</span>
-            </button>
-          </div>
+          <button
+            onClick={handleLogout}
+            className="relative w-11 h-11 rounded-full border-2 border-primary flex items-center justify-center bg-card"
+            aria-label="Account"
+          >
+            <span className="text-foreground font-bold text-sm">
+              {(user.firstName?.[0] || '').toUpperCase()}
+              {(user.lastName?.[0] || '').toUpperCase()}
+            </span>
+            <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-card border border-primary flex items-center justify-center">
+              <EyeOff size={10} className="text-primary" />
+            </span>
+          </button>
         </div>
 
         {/* Video Button */}
         <div className="flex justify-end">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-muted-foreground/30 text-muted-foreground text-sm">
+          <button
+            onClick={() => toast.info('Tutorial video coming soon')}
+            className="flex items-center gap-2 px-5 py-2 rounded-full border border-primary/60 text-primary text-sm font-medium hover:bg-primary/10 transition-colors"
+          >
             <Video size={16} />
             Video
           </button>
@@ -125,20 +139,29 @@ const Dashboard: React.FC = () => {
 
         {/* Balance Card */}
         <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-2xl p-5 animate-fade-in">
-          <div className="flex items-center gap-2 mb-1">
-            <Wallet className="w-4 h-4 text-white/80" />
-            <span className="text-sm text-white/80">Total Balance</span>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <Wallet className="w-4 h-4 text-white/80" />
+              <span className="text-sm text-white/80">Total Balance</span>
+            </div>
+            <button
+              onClick={() => setShowBalance(v => !v)}
+              className="text-white/80 hover:text-white"
+              aria-label="Toggle balance visibility"
+            >
+              {showBalance ? <Eye size={16} /> : <EyeOff size={16} />}
+            </button>
           </div>
           <div className="text-4xl font-bold text-white mb-1">
-            {formatCurrency(user.balance)}
+            {showBalance ? formatCurrency(user.balance) : '₦••••••'}
           </div>
           <div className="text-sm text-white/60 mb-4">
             ID: {user.id}
           </div>
-          
+
           {/* Claim & Withdraw Buttons inside card */}
           <div className="flex gap-3">
-            <button 
+            <button
               onClick={handleClaim}
               disabled={!canClaim}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-white/20 backdrop-blur-sm text-white font-medium disabled:opacity-50 transition-all hover:bg-white/30"
@@ -155,6 +178,21 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
+        {/* Cash In Promo Banner */}
+        <Link to="/buy-rpc" className="block">
+          <div
+            className="relative rounded-2xl overflow-hidden h-32 bg-cover bg-center"
+            style={{ backgroundImage: `url(${cashInBanner})` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
+            <div className="relative p-4 h-full flex flex-col justify-center">
+              <p className="text-white text-2xl font-extrabold leading-none">cash in</p>
+              <p className="text-yellow-400 text-base font-bold leading-tight mt-1 max-w-[60%]">
+                Make your move<br />with RedPay
+              </p>
+            </div>
+          </div>
+        </Link>
 
         {/* Menu Grid */}
         <div className="grid grid-cols-3 gap-3 animate-slide-up">
@@ -172,19 +210,27 @@ const Dashboard: React.FC = () => {
           ))}
         </div>
 
-        {/* Bottom Promo Banner */}
-        <div className="relative bg-gradient-to-r from-background via-red-950/40 to-red-900/30 rounded-2xl p-5 overflow-hidden">
-          <div className="max-w-[60%]">
-            <p className="text-white text-lg font-semibold leading-tight">
-              Start earning with <span className="text-primary">RedPay</span> today!
-            </p>
-            <p className="text-muted-foreground text-sm mt-2">
-              Turn your phone into your money machine.
-            </p>
+        {/* Bottom Earning Banner */}
+        <Link to="/refer" className="block">
+          <div
+            className="relative rounded-2xl overflow-hidden h-36 bg-cover bg-right"
+            style={{ backgroundImage: `url(${earningBanner})` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+            <div className="relative p-4 h-full flex flex-col justify-center max-w-[60%]">
+              <p className="text-white text-lg font-semibold leading-tight">
+                Don't just scroll<br />
+                start earning with <span className="text-primary">RedPay</span> today!
+              </p>
+              <p className="text-muted-foreground text-xs mt-2">
+                Turn your phone into your money machine.
+              </p>
+            </div>
           </div>
-        </div>
+        </Link>
       </div>
     </PageContainer>
+
   );
 };
 
