@@ -72,7 +72,7 @@ const Welcome: React.FC = () => {
             <span className="text-lg font-medium text-muted-foreground">Welcome Bonus</span>
           </div>
           <div className="text-4xl font-bold text-gradient animate-pulse-glow rounded-lg py-2">
-            {formatCurrency(WELCOME_BONUS)}
+            {formatCurrency(displayBalance)}
           </div>
           <p className="text-sm text-muted-foreground mt-4">
             Added to your wallet balance
