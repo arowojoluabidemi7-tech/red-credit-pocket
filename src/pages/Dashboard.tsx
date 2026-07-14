@@ -29,6 +29,8 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [canClaim, setCanClaim] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [showBalance, setShowBalance] = useState(true);
+
 
   const country = COUNTRIES.find(c => c.code === user?.country);
   const currency = country?.currency || '₦';
