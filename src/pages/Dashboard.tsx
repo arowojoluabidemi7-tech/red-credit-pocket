@@ -6,19 +6,23 @@ import { useAuth } from '@/contexts/AuthContext';
 import { storage } from '@/lib/store';
 
 import { COUNTRIES, CLAIM_AMOUNT, CLAIM_INTERVAL } from '@/lib/constants';
-import { 
-  Wallet, 
-  Gift, 
-  ShoppingBag, 
-  Radio, 
-  Users, 
-  Clock, 
+import {
+  Wallet,
+  Gift,
+  ShoppingBag,
+  Radio,
+  Users,
+  Clock,
   Headphones,
   Send,
   Video,
-  
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import cashInBanner from '@/assets/cash-in-banner.jpg';
+import earningBanner from '@/assets/earning-banner.jpg';
+
 
 const Dashboard: React.FC = () => {
   const { user, logout, refreshUser } = useAuth();
