@@ -9,12 +9,13 @@ import { toast } from 'sonner';
 
 const SignIn: React.FC = () => {
   const navigate = useNavigate();
-  const { login, isAdmin } = useAuth();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -22,18 +23,15 @@ const SignIn: React.FC = () => {
       return;
     }
 
-    const success = login(email, password);
-    if (success) {
-      toast.success('Welcome back!');
-      // Check if admin login
-      if (email === 'admin@redpay.com') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
-    } else {
-      toast.error('Invalid email or password');
+    setLoading(true);
+    const { error } = await login(email, password);
+    setLoading(false);
+    if (error) {
+      toast.error(error || 'Invalid email or password');
+      return;
     }
+    toast.success('Welcome back!');
+    navigate('/dashboard');
   };
 
   return (

@@ -36,33 +36,32 @@ const SignUp: React.FC = () => {
       return;
     }
 
-    // Check if email already exists
-    const { storage } = await import('@/lib/store');
-    if (storage.checkEmailExists(formData.email)) {
-      toast.error(
-        <div className="space-y-1">
-          <p>This email is already registered.</p>
-          <p className="text-sm">
-            <a href="/forgot-password" className="text-primary underline">Click here to reset your password</a>
-          </p>
-        </div>,
-        { duration: 5000 }
-      );
-      return;
-    }
-
     setIsProcessing(true);
     setProcessingStep('creating');
 
-    // Wait 2 seconds showing "Creating your account..."
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const { error, user } = await signup(formData);
+    if (error) {
+      setIsProcessing(false);
+      if (error.toLowerCase().includes('registered') || error.toLowerCase().includes('exists')) {
+        toast.error(
+          <div className="space-y-1">
+            <p>This email is already registered.</p>
+            <p className="text-sm">
+              <a href="/forgot-password" className="text-primary underline">Reset your password</a>
+            </p>
+          </div>,
+          { duration: 5000 }
+        );
+      } else {
+        toast.error(error);
+      }
+      return;
+    }
 
+    await new Promise(resolve => setTimeout(resolve, 1500));
     setProcessingStep('almost-done');
+    await new Promise(resolve => setTimeout(resolve, 800));
 
-    // Wait 1 second showing "Your account is almost done"
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const user = signup(formData);
     toast.success('Account created successfully!');
     navigate('/welcome', { state: { user } });
   };
