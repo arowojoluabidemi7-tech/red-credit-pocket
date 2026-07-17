@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/Logo';
-import { Gift, PartyPopper, ArrowRight } from 'lucide-react';
+import { Gift, PartyPopper } from 'lucide-react';
 import { WELCOME_BONUS, COUNTRIES } from '@/lib/constants';
 
 const Welcome: React.FC = () => {
