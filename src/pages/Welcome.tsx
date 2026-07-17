@@ -90,13 +90,6 @@ const Welcome: React.FC = () => {
           </div>
         </div>
 
-        {/* CTA Button */}
-        <div className="animate-slide-up" style={{ animationDelay: '0.8s' }}>
-          <Button size="xl" className="w-full" onClick={() => navigate('/dashboard')}>
-            Go to Dashboard
-            <ArrowRight className="ml-2" />
-          </Button>
-        </div>
       </div>
     </div>
   );
