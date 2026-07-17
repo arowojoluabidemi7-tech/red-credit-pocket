@@ -1,10 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Wallet, Gift, Users, History } from 'lucide-react';
+import { Gift, Users, History } from 'lucide-react';
 
 const navItems = [
-  { icon: Home, label: 'Home', path: '/dashboard' },
-  { icon: Wallet, label: 'Buy RPC', path: '/buy-rpc' },
   { icon: Gift, label: 'Refer', path: '/refer' },
   { icon: Users, label: 'Community', path: '/community' },
   { icon: History, label: 'History', path: '/history' },
