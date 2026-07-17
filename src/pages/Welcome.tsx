@@ -36,8 +36,16 @@ const Welcome: React.FC = () => {
     };
 
     raf = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(raf);
-  }, []);
+
+    const redirectTimer = setTimeout(() => {
+      navigate('/dashboard');
+    }, duration + 300);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(redirectTimer);
+    };
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-12">
