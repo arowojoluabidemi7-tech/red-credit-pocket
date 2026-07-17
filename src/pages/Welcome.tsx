@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/Logo';
-import { Gift, PartyPopper, ArrowRight } from 'lucide-react';
+import { Gift, PartyPopper } from 'lucide-react';
 import { WELCOME_BONUS, COUNTRIES } from '@/lib/constants';
 
 const Welcome: React.FC = () => {
@@ -37,8 +36,16 @@ const Welcome: React.FC = () => {
     };
 
     raf = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(raf);
-  }, []);
+
+    const redirectTimer = setTimeout(() => {
+      navigate('/dashboard');
+    }, duration + 300);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(redirectTimer);
+    };
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-12">
@@ -91,13 +98,6 @@ const Welcome: React.FC = () => {
           </div>
         </div>
 
-        {/* CTA Button */}
-        <div className="animate-slide-up" style={{ animationDelay: '0.8s' }}>
-          <Button size="xl" className="w-full" onClick={() => navigate('/dashboard')}>
-            Go to Dashboard
-            <ArrowRight className="ml-2" />
-          </Button>
-        </div>
       </div>
     </div>
   );
