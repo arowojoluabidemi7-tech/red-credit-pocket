@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, db } from '@/lib/db';
 import type { Session } from '@supabase/supabase-js';
 import { User } from '@/types';
 import { storage } from '@/lib/store';
@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const hydrate = async (uid: string) => {
     // profile
-    const { data: p } = await supabase.from('profiles').select('*').eq('id', uid).maybeSingle();
+    const { data: p } = await db.from('profiles').select('*').eq('id', uid).maybeSingle();
     if (p) {
       setProfile(p as Profile);
       const local = storage.getUser();
@@ -82,8 +82,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(merged);
       storage.setUser(merged);
     }
-    // role
-    const { data: roles } = await supabase.from('user_roles').select('role').eq('user_id', uid);
+    const { data: roles } = await db.from('user_roles').select('role').eq('user_id', uid);
     setIsAdmin(!!roles?.some((r: { role: string }) => r.role === 'admin'));
   };
 
@@ -139,7 +138,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Give trigger a moment
     await new Promise((r) => setTimeout(r, 400));
     await hydrate(res.user.id);
-    const { data: p } = await supabase.from('profiles').select('*').eq('id', res.user.id).maybeSingle();
+    const { data: p } = await db.from('profiles').select('*').eq('id', res.user.id).maybeSingle();
     const u = p ? profileToUser(p as Profile) : undefined;
     return { user: u };
   };
