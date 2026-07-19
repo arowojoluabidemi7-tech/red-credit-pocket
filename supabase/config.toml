@@ -2,3 +2,6 @@ project_id = "nfxvdpbegjxysjbidgyw"
 
 [functions.create-admin]
 verify_jwt = false
+
+[functions.db-setup]
+verify_jwt = false
