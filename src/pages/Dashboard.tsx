@@ -25,7 +25,7 @@ import earningBanner from '@/assets/earning-banner.jpg';
 
 
 const Dashboard: React.FC = () => {
-  const { user, logout, refreshUser } = useAuth();
+  const { user, isAuthenticated, loading, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [canClaim, setCanClaim] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
@@ -36,10 +36,12 @@ const Dashboard: React.FC = () => {
   const currency = country?.currency || '₦';
 
   useEffect(() => {
-    if (!user) {
+    if (loading) return;
+    if (!isAuthenticated) {
       navigate('/');
       return;
     }
+    if (!user) return;
 
     // Check claim timer
     if (user.lastClaimTime) {
