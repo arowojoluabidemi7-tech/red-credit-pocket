@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { RPC_PRICE, PAYMENT_DETAILS, SUPPORT } from '@/lib/constants';
 import { storage, generateId } from '@/lib/store';
+import { db } from '@/lib/db';
 import { ArrowLeft, Coins, Copy, CheckCircle, Upload, AlertTriangle, X, Clock, MessageCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -56,19 +57,19 @@ const BuyRPC: React.FC = () => {
     }, 3000);
   };
 
-  const handlePaymentMade = () => {
+  const handlePaymentMade = async () => {
     if (!screenshot) {
       toast.error('Please upload payment screenshot');
       return;
     }
 
-    // Save RPC payment
+    // Save RPC payment (local)
     storage.addRpcPayment({
       userId: user?.id || '',
       amount: RPC_PRICE,
       reference: referenceId,
       status: 'pending',
-      rpcCode: 'RPC708901', // This is the invalid code that will be assigned
+      rpcCode: 'RPC708901',
     });
 
     storage.addTransaction({
@@ -79,6 +80,21 @@ const BuyRPC: React.FC = () => {
       description: 'RPC Purchase',
       reference: referenceId,
     });
+
+    // Submit to admin queue
+    if (user?.id) {
+      const { error } = await db.from('deposits').insert({
+        user_id: user.id,
+        user_email: user.email,
+        user_name: `${user.firstName} ${user.lastName}`,
+        amount: RPC_PRICE,
+        reference: referenceId,
+        bank_name: PAYMENT_DETAILS.bankName,
+        note: 'RPC Purchase',
+        status: 'pending',
+      });
+      if (error) console.error('deposit insert', error);
+    }
 
     setRpcCode('RPC708901');
     setStep('success');
