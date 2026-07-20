@@ -128,9 +128,12 @@ const Dashboard: React.FC = () => {
 
         {/* Trust row */}
         <div className="flex items-center justify-around py-1">
-          <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+          <button
+            onClick={() => isAdmin ? navigate('/admin') : toast.success('Your account is secured')}
+            className="flex items-center gap-1.5 text-muted-foreground text-sm"
+          >
             <ShieldCheck className="w-4 h-4 text-green-500" /> Secured
-          </div>
+          </button>
           <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
             <Zap className="w-4 h-4 text-yellow-400" /> Instant
           </div>
