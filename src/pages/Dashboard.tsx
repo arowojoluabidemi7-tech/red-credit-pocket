@@ -112,7 +112,7 @@ const Dashboard: React.FC = () => {
               </span>
             </button>
             <button
-              onClick={logout}
+              onClick={() => navigate(isAdmin ? '/admin' : '/refer')}
               className="flex items-center gap-2 pl-3 pr-1 py-1 rounded-full border border-primary/60 bg-card"
               aria-label="Account"
             >
