@@ -41,6 +41,62 @@ export type Database = {
         }
         Relationships: []
       }
+      deposits: {
+        Row: {
+          admin_id: string | null
+          admin_note: string | null
+          amount: number
+          bank_name: string | null
+          created_at: string
+          id: string
+          note: string | null
+          reference: string
+          reviewed_at: string | null
+          status: string
+          user_email: string | null
+          user_id: string
+          user_name: string | null
+        }
+        Insert: {
+          admin_id?: string | null
+          admin_note?: string | null
+          amount: number
+          bank_name?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          reference: string
+          reviewed_at?: string | null
+          status?: string
+          user_email?: string | null
+          user_id: string
+          user_name?: string | null
+        }
+        Update: {
+          admin_id?: string | null
+          admin_note?: string | null
+          amount?: number
+          bank_name?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          reference?: string
+          reviewed_at?: string | null
+          status?: string
+          user_email?: string | null
+          user_id?: string
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deposits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           account_status: Database["public"]["Enums"]["account_status"]
