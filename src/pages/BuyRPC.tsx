@@ -401,40 +401,7 @@ const BuyRPC: React.FC = () => {
             </Button>
           </div>
         )}
-          </div>
-        )}
 
-        {step === 'success' && (
-          <div className="space-y-6 animate-scale-in text-center py-8">
-            <div className="w-20 h-20 mx-auto rounded-full bg-destructive/20 flex items-center justify-center">
-              <X className="w-10 h-10 text-destructive" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-destructive">Payment Not Received</h2>
-              <p className="text-muted-foreground">We didn't receive any payment from you</p>
-            </div>
-            <div className="glass-card rounded-xl p-6 space-y-4">
-              <p className="text-sm text-muted-foreground">Reference ID</p>
-              <div className="text-lg font-mono font-bold text-primary">{referenceId}</div>
-              <div className="border-t border-border pt-4">
-                <p className="text-sm text-foreground mb-3">
-                  If you have made a payment, please contact support with your payment receipt
-                </p>
-                <Button 
-                  size="lg" 
-                  className="w-full"
-                  onClick={() => setShowWhatsAppWarning(true)}
-                >
-                  <MessageCircle className="w-5 h-5 mr-2" />
-                  Contact Support
-                </Button>
-              </div>
-            </div>
-            <Button variant="outline" size="lg" className="w-full" onClick={() => navigate('/dashboard')}>
-              Back to Dashboard
-            </Button>
-          </div>
-        )}
 
         {/* WhatsApp Warning Dialog */}
         <Dialog open={showWhatsAppWarning} onOpenChange={setShowWhatsAppWarning}>
