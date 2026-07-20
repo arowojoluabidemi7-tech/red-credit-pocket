@@ -325,9 +325,82 @@ const BuyRPC: React.FC = () => {
               </label>
             </div>
 
-            <Button size="lg" className="w-full" onClick={handlePaymentMade}>
-              I Have Made Payment
+            <Button size="lg" className="w-full" onClick={handlePaymentMade} disabled={submitting}>
+              {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...</> : 'I Have Made Payment'}
             </Button>
+          </div>
+        )}
+
+        {step === 'review' && depositStatus === 'pending' && (
+          <div className="space-y-6 animate-scale-in text-center py-8">
+            <div className="w-20 h-20 mx-auto rounded-full bg-yellow-500/20 flex items-center justify-center">
+              <Clock className="w-10 h-10 text-yellow-500 animate-pulse" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-foreground">Processing — Under Review</h2>
+              <p className="text-muted-foreground">
+                Your payment has been submitted. An admin will review it shortly.
+              </p>
+            </div>
+            <div className="glass-card rounded-xl p-6 space-y-2">
+              <p className="text-sm text-muted-foreground">Reference ID</p>
+              <div className="text-lg font-mono font-bold text-primary">{referenceId}</div>
+            </div>
+            <Button variant="outline" size="lg" className="w-full" onClick={() => navigate('/dashboard')}>
+              Back to Dashboard
+            </Button>
+          </div>
+        )}
+
+        {step === 'review' && depositStatus === 'approved' && (
+          <div className="space-y-6 animate-scale-in text-center py-8">
+            <div className="w-20 h-20 mx-auto rounded-full bg-green-500/20 flex items-center justify-center">
+              <CheckCircle className="w-10 h-10 text-green-500" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-green-500">Payment Confirmed</h2>
+              <p className="text-muted-foreground">Your RPC has been credited to your account.</p>
+            </div>
+            <div className="glass-card rounded-xl p-6 space-y-3">
+              <p className="text-sm text-muted-foreground">Your RPC Code</p>
+              <div className="flex items-center justify-center gap-2">
+                <div className="text-2xl font-mono font-bold text-primary">{rpcCode}</div>
+                <button onClick={() => copyToClipboard(rpcCode, 'RPC code')}>
+                  {copied === 'RPC code' ? <CheckCircle size={18} className="text-success" /> : <Copy size={18} className="text-muted-foreground" />}
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">Reference: {referenceId}</p>
+            </div>
+            <Button size="lg" className="w-full" onClick={() => navigate('/dashboard')}>
+              Go to Dashboard
+            </Button>
+          </div>
+        )}
+
+        {step === 'review' && depositStatus === 'rejected' && (
+          <div className="space-y-6 animate-scale-in text-center py-8">
+            <div className="w-20 h-20 mx-auto rounded-full bg-destructive/20 flex items-center justify-center">
+              <X className="w-10 h-10 text-destructive" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-destructive">Payment Rejected</h2>
+              <p className="text-muted-foreground">
+                {adminNote || 'Your payment could not be verified. Please contact support.'}
+              </p>
+            </div>
+            <div className="glass-card rounded-xl p-6 space-y-2">
+              <p className="text-sm text-muted-foreground">Reference ID</p>
+              <div className="text-lg font-mono font-bold text-primary">{referenceId}</div>
+              <Button size="lg" className="w-full mt-3" onClick={() => setShowWhatsAppWarning(true)}>
+                <MessageCircle className="w-5 h-5 mr-2" />
+                Contact Support
+              </Button>
+            </div>
+            <Button variant="outline" size="lg" className="w-full" onClick={() => navigate('/dashboard')}>
+              Back to Dashboard
+            </Button>
+          </div>
+        )}
           </div>
         )}
 
