@@ -22,12 +22,16 @@ Deno.serve(async (req) => {
           WITH CHECK (auth.uid() = user_id);
       EXCEPTION WHEN duplicate_object THEN NULL; END $$;
       DO $$ BEGIN
-        CREATE POLICY "receipts public read" ON storage.objects
-          FOR SELECT TO public USING (bucket_id = 'receipts');
-      EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-      DO $$ BEGIN
         CREATE POLICY "receipts auth upload" ON storage.objects
           FOR INSERT TO authenticated WITH CHECK (bucket_id = 'receipts');
+      EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+      DO $$ BEGIN
+        CREATE POLICY "receipts owner read" ON storage.objects
+          FOR SELECT TO authenticated USING (bucket_id = 'receipts' AND owner = auth.uid());
+      EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+      DO $$ BEGIN
+        CREATE POLICY "receipts admin read" ON storage.objects
+          FOR SELECT TO authenticated USING (bucket_id = 'receipts' AND public.has_role(auth.uid(),'admin'));
       EXCEPTION WHEN duplicate_object THEN NULL; END $$;
     `);
 
