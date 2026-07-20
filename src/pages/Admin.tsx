@@ -548,6 +548,18 @@ const Admin: React.FC = () => {
                     </div>
                   </div>
 
+                  {receiptUrls[d.id] && (
+                    <div className="mt-4">
+                      <p className="text-xs text-muted-foreground mb-2">Payment receipt</p>
+                      <button
+                        onClick={() => setViewReceipt(receiptUrls[d.id])}
+                        className="block rounded-lg overflow-hidden border border-border hover:border-primary transition-colors"
+                      >
+                        <img src={receiptUrls[d.id]} alt="Payment receipt" className="max-h-48 w-auto object-contain bg-black/30" />
+                      </button>
+                    </div>
+                  )}
+
                   {d.status === 'pending' && (
                     <div className="flex gap-2 mt-4">
                       <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white" onClick={() => approveDeposit(d)} disabled={busy}>
