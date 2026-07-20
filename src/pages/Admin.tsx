@@ -71,7 +71,7 @@ interface Deposit {
   id: string; user_id: string; user_email: string | null; user_name: string | null;
   amount: number; reference: string; bank_name: string | null; note: string | null;
   status: 'pending' | 'approved' | 'rejected'; admin_note: string | null;
-  reviewed_at: string | null; created_at: string;
+  reviewed_at: string | null; created_at: string; screenshot_url: string | null;
 }
 
 type Tab = 'overview' | 'users' | 'payments' | 'audit';
@@ -85,6 +85,8 @@ const Admin: React.FC = () => {
   const [roles, setRoles] = useState<RoleRow[]>([]);
   const [audits, setAudits] = useState<AuditRow[]>([]);
   const [deposits, setDeposits] = useState<Deposit[]>([]);
+  const [receiptUrls, setReceiptUrls] = useState<Record<string, string>>({});
+  const [viewReceipt, setViewReceipt] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -114,7 +116,16 @@ const Admin: React.FC = () => {
     setProfiles((p as AdminProfile[]) || []);
     setRoles((r as RoleRow[]) || []);
     setAudits((a as AuditRow[]) || []);
-    setDeposits((d as Deposit[]) || []);
+    const deps = (d as Deposit[]) || [];
+    setDeposits(deps);
+
+    // Generate signed URLs for receipts
+    const urls: Record<string, string> = {};
+    await Promise.all(deps.filter((x) => x.screenshot_url).map(async (x) => {
+      const { data: signed } = await db.storage.from('receipts').createSignedUrl(x.screenshot_url!, 3600);
+      if (signed?.signedUrl) urls[x.id] = signed.signedUrl;
+    }));
+    setReceiptUrls(urls);
   };
 
   const logAction = async (action: string, target?: string, details?: Record<string, unknown>) => {
@@ -537,6 +548,18 @@ const Admin: React.FC = () => {
                     </div>
                   </div>
 
+                  {receiptUrls[d.id] && (
+                    <div className="mt-4">
+                      <p className="text-xs text-muted-foreground mb-2">Payment receipt</p>
+                      <button
+                        onClick={() => setViewReceipt(receiptUrls[d.id])}
+                        className="block rounded-lg overflow-hidden border border-border hover:border-primary transition-colors"
+                      >
+                        <img src={receiptUrls[d.id]} alt="Payment receipt" className="max-h-48 w-auto object-contain bg-black/30" />
+                      </button>
+                    </div>
+                  )}
+
                   {d.status === 'pending' && (
                     <div className="flex gap-2 mt-4">
                       <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white" onClick={() => approveDeposit(d)} disabled={busy}>
@@ -629,6 +652,18 @@ const Admin: React.FC = () => {
               {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Reject Payment'}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Receipt viewer */}
+      <Dialog open={!!viewReceipt} onOpenChange={(o) => !o && setViewReceipt(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Payment Receipt</DialogTitle>
+          </DialogHeader>
+          {viewReceipt && (
+            <img src={viewReceipt} alt="Payment receipt" className="w-full h-auto rounded-lg" />
+          )}
         </DialogContent>
       </Dialog>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/PageContainer';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-type Step = 'notice' | 'form' | 'processing' | 'payment' | 'upload' | 'success';
+type Step = 'notice' | 'form' | 'processing' | 'payment' | 'upload' | 'review';
 
 const BuyRPC: React.FC = () => {
   const navigate = useNavigate();
@@ -32,7 +32,11 @@ const BuyRPC: React.FC = () => {
   const [copied, setCopied] = useState<string | null>(null);
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [referenceId] = useState(`REF${generateId()}`);
-  const [rpcCode, setRpcCode] = useState('');
+  const [rpcCode] = useState('RPC6097');
+  const [depositId, setDepositId] = useState<string | null>(null);
+  const [depositStatus, setDepositStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
+  const [adminNote, setAdminNote] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -62,43 +66,70 @@ const BuyRPC: React.FC = () => {
       toast.error('Please upload payment screenshot');
       return;
     }
+    if (!user?.id) return;
+    setSubmitting(true);
 
-    // Save RPC payment (local)
-    storage.addRpcPayment({
-      userId: user?.id || '',
-      amount: RPC_PRICE,
-      reference: referenceId,
-      status: 'pending',
-      rpcCode: 'RPC708901',
+    // Upload screenshot to receipts bucket
+    let screenshotUrl: string | null = null;
+    const ext = screenshot.name.split('.').pop() || 'jpg';
+    const path = `${user.id}/${referenceId}.${ext}`;
+    const { error: upErr } = await db.storage.from('receipts').upload(path, screenshot, {
+      upsert: true, contentType: screenshot.type,
     });
-
-    storage.addTransaction({
-      userId: user?.id || '',
-      type: 'rpc_purchase',
-      amount: RPC_PRICE,
-      status: 'pending',
-      description: 'RPC Purchase',
-      reference: referenceId,
-    });
-
-    // Submit to admin queue
-    if (user?.id) {
-      const { error } = await db.from('deposits').insert({
-        user_id: user.id,
-        user_email: user.email,
-        user_name: `${user.firstName} ${user.lastName}`,
-        amount: RPC_PRICE,
-        reference: referenceId,
-        bank_name: PAYMENT_DETAILS.bankName,
-        note: 'RPC Purchase',
-        status: 'pending',
-      });
-      if (error) console.error('deposit insert', error);
+    if (upErr) {
+      setSubmitting(false);
+      toast.error('Upload failed: ' + upErr.message);
+      return;
     }
+    screenshotUrl = path;
 
-    setRpcCode('RPC708901');
-    setStep('success');
+    // Local records
+    storage.addRpcPayment({
+      userId: user.id, amount: RPC_PRICE, reference: referenceId, status: 'pending', rpcCode,
+    });
+    storage.addTransaction({
+      userId: user.id, type: 'rpc_purchase', amount: RPC_PRICE, status: 'pending',
+      description: 'RPC Purchase', reference: referenceId,
+    });
+
+    // Admin queue
+    const { data, error } = await db.from('deposits').insert({
+      user_id: user.id,
+      user_email: user.email,
+      user_name: `${user.firstName} ${user.lastName}`,
+      amount: RPC_PRICE,
+      reference: referenceId,
+      bank_name: PAYMENT_DETAILS.bankName,
+      note: 'RPC Purchase',
+      status: 'pending',
+      screenshot_url: screenshotUrl,
+    }).select('id').single();
+
+    setSubmitting(false);
+    if (error) {
+      toast.error('Submit failed: ' + error.message);
+      return;
+    }
+    setDepositId(data.id);
+    setDepositStatus('pending');
+    setStep('review');
   };
+
+  // Poll deposit status while under review
+  useEffect(() => {
+    if (step !== 'review' || !depositId) return;
+    let alive = true;
+    const check = async () => {
+      const { data } = await db.from('deposits')
+        .select('status, admin_note').eq('id', depositId).single();
+      if (!alive || !data) return;
+      setDepositStatus(data.status);
+      setAdminNote(data.admin_note);
+    };
+    check();
+    const iv = setInterval(check, 5000);
+    return () => { alive = false; clearInterval(iv); };
+  }, [step, depositId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -294,43 +325,83 @@ const BuyRPC: React.FC = () => {
               </label>
             </div>
 
-            <Button size="lg" className="w-full" onClick={handlePaymentMade}>
-              I Have Made Payment
+            <Button size="lg" className="w-full" onClick={handlePaymentMade} disabled={submitting}>
+              {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...</> : 'I Have Made Payment'}
             </Button>
           </div>
         )}
 
-        {step === 'success' && (
+        {step === 'review' && depositStatus === 'pending' && (
           <div className="space-y-6 animate-scale-in text-center py-8">
-            <div className="w-20 h-20 mx-auto rounded-full bg-destructive/20 flex items-center justify-center">
-              <X className="w-10 h-10 text-destructive" />
+            <div className="w-20 h-20 mx-auto rounded-full bg-yellow-500/20 flex items-center justify-center">
+              <Clock className="w-10 h-10 text-yellow-500 animate-pulse" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-destructive">Payment Not Received</h2>
-              <p className="text-muted-foreground">We didn't receive any payment from you</p>
+              <h2 className="text-2xl font-bold text-foreground">Processing — Under Review</h2>
+              <p className="text-muted-foreground">
+                Your payment has been submitted. An admin will review it shortly.
+              </p>
             </div>
-            <div className="glass-card rounded-xl p-6 space-y-4">
+            <div className="glass-card rounded-xl p-6 space-y-2">
               <p className="text-sm text-muted-foreground">Reference ID</p>
               <div className="text-lg font-mono font-bold text-primary">{referenceId}</div>
-              <div className="border-t border-border pt-4">
-                <p className="text-sm text-foreground mb-3">
-                  If you have made a payment, please contact support with your payment receipt
-                </p>
-                <Button 
-                  size="lg" 
-                  className="w-full"
-                  onClick={() => setShowWhatsAppWarning(true)}
-                >
-                  <MessageCircle className="w-5 h-5 mr-2" />
-                  Contact Support
-                </Button>
-              </div>
             </div>
             <Button variant="outline" size="lg" className="w-full" onClick={() => navigate('/dashboard')}>
               Back to Dashboard
             </Button>
           </div>
         )}
+
+        {step === 'review' && depositStatus === 'approved' && (
+          <div className="space-y-6 animate-scale-in text-center py-8">
+            <div className="w-20 h-20 mx-auto rounded-full bg-green-500/20 flex items-center justify-center">
+              <CheckCircle className="w-10 h-10 text-green-500" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-green-500">Payment Confirmed</h2>
+              <p className="text-muted-foreground">Your RPC has been credited to your account.</p>
+            </div>
+            <div className="glass-card rounded-xl p-6 space-y-3">
+              <p className="text-sm text-muted-foreground">Your RPC Code</p>
+              <div className="flex items-center justify-center gap-2">
+                <div className="text-2xl font-mono font-bold text-primary">{rpcCode}</div>
+                <button onClick={() => copyToClipboard(rpcCode, 'RPC code')}>
+                  {copied === 'RPC code' ? <CheckCircle size={18} className="text-success" /> : <Copy size={18} className="text-muted-foreground" />}
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">Reference: {referenceId}</p>
+            </div>
+            <Button size="lg" className="w-full" onClick={() => navigate('/dashboard')}>
+              Go to Dashboard
+            </Button>
+          </div>
+        )}
+
+        {step === 'review' && depositStatus === 'rejected' && (
+          <div className="space-y-6 animate-scale-in text-center py-8">
+            <div className="w-20 h-20 mx-auto rounded-full bg-destructive/20 flex items-center justify-center">
+              <X className="w-10 h-10 text-destructive" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-destructive">Payment Rejected</h2>
+              <p className="text-muted-foreground">
+                {adminNote || 'Your payment could not be verified. Please contact support.'}
+              </p>
+            </div>
+            <div className="glass-card rounded-xl p-6 space-y-2">
+              <p className="text-sm text-muted-foreground">Reference ID</p>
+              <div className="text-lg font-mono font-bold text-primary">{referenceId}</div>
+              <Button size="lg" className="w-full mt-3" onClick={() => setShowWhatsAppWarning(true)}>
+                <MessageCircle className="w-5 h-5 mr-2" />
+                Contact Support
+              </Button>
+            </div>
+            <Button variant="outline" size="lg" className="w-full" onClick={() => navigate('/dashboard')}>
+              Back to Dashboard
+            </Button>
+          </div>
+        )}
+
 
         {/* WhatsApp Warning Dialog */}
         <Dialog open={showWhatsAppWarning} onOpenChange={setShowWhatsAppWarning}>

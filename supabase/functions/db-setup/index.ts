@@ -14,43 +14,24 @@ Deno.serve(async (req) => {
     const sql = postgres(dbUrl, { max: 1 });
 
     await sql.unsafe(`
-      CREATE TABLE IF NOT EXISTS public.deposits (
-        id uuid primary key default gen_random_uuid(),
-        user_id uuid not null references public.profiles(id) on delete cascade,
-        user_email text,
-        user_name text,
-        amount numeric not null,
-        reference text not null,
-        bank_name text,
-        note text,
-        status text not null default 'pending',
-        admin_id uuid,
-        admin_note text,
-        reviewed_at timestamptz,
-        created_at timestamptz not null default now()
-      );
-      GRANT SELECT, INSERT ON public.deposits TO authenticated;
-      GRANT ALL ON public.deposits TO service_role;
-      ALTER TABLE public.deposits ENABLE ROW LEVEL SECURITY;
+      ALTER TABLE public.deposits ADD COLUMN IF NOT EXISTS screenshot_url text;
       DO $$ BEGIN
-        CREATE POLICY "user insert own deposit" ON public.deposits
-          FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
-      EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-      DO $$ BEGIN
-        CREATE POLICY "read own or admin deposits" ON public.deposits
-          FOR SELECT TO authenticated
-          USING (auth.uid() = user_id OR public.has_role(auth.uid(),'admin'));
-      EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-      DO $$ BEGIN
-        CREATE POLICY "admin update deposits" ON public.deposits
+        CREATE POLICY "user update own pending deposit" ON public.deposits
           FOR UPDATE TO authenticated
-          USING (public.has_role(auth.uid(),'admin'))
-          WITH CHECK (public.has_role(auth.uid(),'admin'));
+          USING (auth.uid() = user_id AND status = 'pending')
+          WITH CHECK (auth.uid() = user_id);
       EXCEPTION WHEN duplicate_object THEN NULL; END $$;
       DO $$ BEGIN
-        CREATE POLICY "admin delete deposits" ON public.deposits
-          FOR DELETE TO authenticated
-          USING (public.has_role(auth.uid(),'admin'));
+        CREATE POLICY "receipts auth upload" ON storage.objects
+          FOR INSERT TO authenticated WITH CHECK (bucket_id = 'receipts');
+      EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+      DO $$ BEGIN
+        CREATE POLICY "receipts owner read" ON storage.objects
+          FOR SELECT TO authenticated USING (bucket_id = 'receipts' AND owner = auth.uid());
+      EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+      DO $$ BEGIN
+        CREATE POLICY "receipts admin read" ON storage.objects
+          FOR SELECT TO authenticated USING (bucket_id = 'receipts' AND public.has_role(auth.uid(),'admin'));
       EXCEPTION WHEN duplicate_object THEN NULL; END $$;
     `);
 
