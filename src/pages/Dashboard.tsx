@@ -4,7 +4,6 @@ import { PageContainer } from '@/components/PageContainer';
 import { Logo } from '@/components/Logo';
 import { useAuth } from '@/contexts/AuthContext';
 import { storage } from '@/lib/store';
-
 import { COUNTRIES, CLAIM_AMOUNT, CLAIM_INTERVAL } from '@/lib/constants';
 import {
   Wallet,
@@ -16,21 +15,22 @@ import {
   Headphones,
   Send,
   Video,
-  Eye,
-  EyeOff,
+  Bell,
+  ShieldCheck,
+  Zap,
+  BadgeCheck,
+  TrendingUp,
+  Sparkles,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import cashInBanner from '@/assets/cash-in-banner.jpg';
 import earningBanner from '@/assets/earning-banner.jpg';
-
 
 const Dashboard: React.FC = () => {
   const { user, isAuthenticated, loading, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [canClaim, setCanClaim] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
-  const [showBalance, setShowBalance] = useState(true);
-
+  const [bannerIndex, setBannerIndex] = useState(1);
 
   const country = COUNTRIES.find(c => c.code === user?.country);
   const currency = country?.currency || '₦';
@@ -42,8 +42,6 @@ const Dashboard: React.FC = () => {
       return;
     }
     if (!user) return;
-
-    // Check claim timer
     if (user.lastClaimTime) {
       const elapsed = Date.now() - user.lastClaimTime;
       if (elapsed < CLAIM_INTERVAL) {
@@ -51,38 +49,31 @@ const Dashboard: React.FC = () => {
         setTimeLeft(Math.ceil((CLAIM_INTERVAL - elapsed) / 1000));
       }
     }
-  }, [user, navigate]);
+  }, [user, isAuthenticated, loading, navigate]);
 
   useEffect(() => {
     if (timeLeft > 0) {
-      const timer = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            setCanClaim(true);
-            return 0;
-          }
-          return prev - 1;
+      const t = setInterval(() => {
+        setTimeLeft(p => {
+          if (p <= 1) { setCanClaim(true); return 0; }
+          return p - 1;
         });
       }, 1000);
-      return () => clearInterval(timer);
+      return () => clearInterval(t);
     }
   }, [timeLeft]);
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  useEffect(() => {
+    const t = setInterval(() => setBannerIndex(i => (i + 1) % 4), 3500);
+    return () => clearInterval(t);
+  }, []);
 
-  const formatCurrency = (amount: number) => {
-    return `${currency}${amount.toLocaleString()}`;
-  };
+  const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
+  const formatCurrency = (n: number) => `${currency}${n.toLocaleString()}`;
 
   const handleClaim = () => {
     if (!user || !canClaim) return;
-    
-    const success = storage.claimBonus(user.id);
-    if (success) {
+    if (storage.claimBonus(user.id)) {
       refreshUser();
       setCanClaim(false);
       setTimeLeft(CLAIM_INTERVAL / 1000);
@@ -90,149 +81,204 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
   const menuItems = [
-    { icon: ShoppingBag, label: 'BuyRPC', path: '/buy-rpc', bgColor: 'bg-red-600' },
-    { icon: Radio, label: 'Broadcast', path: '/broadcast', bgColor: 'bg-purple-600' },
-    { icon: Gift, label: 'Refer&Earn', path: '/refer', bgColor: 'bg-blue-600' },
-    { icon: Users, label: 'Community', path: '/community', bgColor: 'bg-green-600' },
-    { icon: Clock, label: 'History', path: '/history', bgColor: 'bg-orange-500' },
-    { icon: Headphones, label: 'Support', path: '/support', bgColor: 'bg-cyan-500' },
+    { icon: Gift, label: 'Buy RPC', sub: 'Get verified', path: '/buy-rpc', color: 'bg-red-500' },
+    { icon: Radio, label: 'Broadcast', sub: 'Go live', path: '/broadcast', color: 'bg-purple-500' },
+    { icon: Gift, label: 'Refer & Earn', sub: 'Invite friends', path: '/refer', color: 'bg-blue-500' },
+    { icon: Users, label: 'Community', sub: 'Join others', path: '/community', color: 'bg-green-500' },
+    { icon: Clock, label: 'History', sub: 'View records', path: '/history', color: 'bg-orange-500' },
+    { icon: Headphones, label: 'Support', sub: 'Get help', path: '/support', color: 'bg-pink-500' },
   ];
 
   if (!user) return null;
 
+  const shortId = user.id.replace(/-/g, '').slice(0, 10);
+
   return (
     <PageContainer>
-
       <div className="p-4 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
           <Logo size="sm" />
-          <button
-            onClick={handleLogout}
-            className="relative w-11 h-11 rounded-full border-2 border-primary flex items-center justify-center bg-card"
-            aria-label="Account"
-          >
-            <span className="text-foreground font-bold text-sm">
-              {(user.firstName?.[0] || '').toUpperCase()}
-              {(user.lastName?.[0] || '').toUpperCase()}
-            </span>
-            <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-card border border-primary flex items-center justify-center">
-              <EyeOff size={10} className="text-primary" />
-            </span>
-          </button>
-        </div>
-
-        {/* Video Button */}
-        <div className="flex justify-end">
-          <button
-            onClick={() => toast.info('Tutorial video coming soon')}
-            className="flex items-center gap-2 px-5 py-2 rounded-full border border-primary/60 text-primary text-sm font-medium hover:bg-primary/10 transition-colors"
-          >
-            <Video size={16} />
-            Video
-          </button>
-        </div>
-
-        {/* Balance Card */}
-        <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-2xl p-5 animate-fade-in">
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2">
-              <Wallet className="w-4 h-4 text-white/80" />
-              <span className="text-sm text-white/80">Total Balance</span>
-            </div>
+          <div className="flex items-center gap-3">
             <button
-              onClick={() => setShowBalance(v => !v)}
-              className="text-white/80 hover:text-white"
-              aria-label="Toggle balance visibility"
+              onClick={() => toast.info('No new notifications')}
+              className="relative p-2"
+              aria-label="Notifications"
             >
-              {showBalance ? <Eye size={16} /> : <EyeOff size={16} />}
+              <Bell className="w-6 h-6 text-foreground" />
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center px-1">
+                3
+              </span>
+            </button>
+            <button
+              onClick={logout}
+              className="flex items-center gap-2 pl-3 pr-1 py-1 rounded-full border border-primary/60 bg-card"
+              aria-label="Account"
+            >
+              <span className="text-sm text-foreground font-medium">
+                {user.firstName || 'User'}
+              </span>
+              <span className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">
+                {(user.firstName?.[0] || 'U').toUpperCase()}
+              </span>
             </button>
           </div>
-          <div className="text-4xl font-bold text-white mb-1">
-            {showBalance ? formatCurrency(user.balance) : '₦••••••'}
+        </div>
+
+        {/* Trust row */}
+        <div className="flex items-center justify-around py-1">
+          <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+            <ShieldCheck className="w-4 h-4 text-green-500" /> Secured
           </div>
-          <div className="text-sm text-white/60 mb-4">
-            ID: {user.id}
+          <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+            <Zap className="w-4 h-4 text-yellow-400" /> Instant
+          </div>
+          <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+            <BadgeCheck className="w-4 h-4 text-blue-500" /> Verified
+          </div>
+        </div>
+
+        {/* Balance card */}
+        <div className="bg-gradient-to-br from-red-500 to-red-700 rounded-3xl p-5 shadow-xl">
+          <div className="flex items-start justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Wallet className="w-5 h-5 text-white" />
+              <span className="text-white/90 font-medium">Total Balance</span>
+            </div>
+            <button
+              onClick={() => toast.info('Tutorial video coming soon')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 text-white text-xs font-medium"
+            >
+              <Video size={14} /> Watch
+            </button>
           </div>
 
-          {/* Claim & Withdraw Buttons inside card */}
-          <div className="flex gap-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1">
+              <div className="text-4xl font-extrabold text-white leading-none">
+                {formatCurrency(user.balance)}
+              </div>
+              <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/15 text-white text-xs">
+                <TrendingUp size={12} /> +₦30k
+              </div>
+              <div className="text-white/70 text-xs mt-2">ID: {shortId}</div>
+            </div>
+
+            <Link
+              to="/refer"
+              className="w-24 rounded-2xl bg-white/10 border border-white/20 p-3 flex flex-col items-center justify-center text-white"
+            >
+              <Users size={18} />
+              <span className="text-xs mt-1">Referrals</span>
+              <span className="text-xl font-bold leading-none mt-1">0</span>
+            </Link>
+          </div>
+
+          <div className="flex gap-3 mt-4">
             <button
               onClick={handleClaim}
               disabled={!canClaim}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-white/20 backdrop-blur-sm text-white font-medium disabled:opacity-50 transition-all hover:bg-white/30"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-white text-primary font-semibold disabled:opacity-60"
             >
               <Gift size={18} />
               {canClaim ? `Claim ${formatCurrency(CLAIM_AMOUNT)}` : formatTime(timeLeft)}
             </button>
             <Link to="/withdraw" className="flex-1">
-              <button className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white/20 backdrop-blur-sm text-white font-medium transition-all hover:bg-white/30">
-                <Send size={18} />
-                Withdraw
+              <button className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/15 text-white font-semibold">
+                <Send size={18} /> Withdraw
               </button>
             </Link>
           </div>
         </div>
 
-        {/* Cash In Promo Banner */}
-        <Link to="/buy-rpc" className="block">
+        {/* Earning banner */}
+        <Link to="/refer" className="block">
           <div
-            className="relative rounded-2xl overflow-hidden h-32 bg-cover bg-center"
-            style={{ backgroundImage: `url(${cashInBanner})` }}
+            className="relative rounded-2xl overflow-hidden h-40 bg-cover bg-center"
+            style={{ backgroundImage: `url(${earningBanner})` }}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
-            <div className="relative p-4 h-full flex flex-col justify-center">
-              <p className="text-white text-2xl font-extrabold leading-none">cash in</p>
-              <p className="text-yellow-400 text-base font-bold leading-tight mt-1 max-w-[60%]">
-                Make your move<br />with RedPay
+            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/40 to-transparent" />
+            <div className="relative p-4 h-full flex flex-col justify-center max-w-[65%]">
+              <p className="text-white text-xl font-extrabold leading-tight">
+                Start earning with<br />
+                <span className="text-primary">RedPay</span> today!
               </p>
+              <p className="text-white text-sm font-semibold mt-2 leading-tight">
+                Turn your phone into<br />your money machine.
+              </p>
+            </div>
+            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5">
+              {[0, 1, 2, 3].map(i => (
+                <span
+                  key={i}
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === bannerIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/50'
+                  }`}
+                />
+              ))}
             </div>
           </div>
         </Link>
 
-        {/* Menu Grid */}
-        <div className="grid grid-cols-3 gap-3 animate-slide-up">
-          {menuItems.map(({ icon: Icon, label, path, bgColor }) => (
+        {/* Quick Actions header */}
+        <div className="flex items-center justify-between pt-1">
+          <h2 className="text-primary text-xl font-bold">Quick Actions</h2>
+          <button
+            onClick={() => toast.info('More features coming soon')}
+            className="flex items-center gap-1 text-muted-foreground text-sm"
+          >
+            <Sparkles size={14} /> Explore features
+          </button>
+        </div>
+
+        {/* Menu grid */}
+        <div className="grid grid-cols-3 gap-3">
+          {menuItems.map(({ icon: Icon, label, sub, path, color }) => (
             <Link
               key={path}
               to={path}
-              className="bg-card rounded-2xl p-4 flex flex-col items-center gap-3 hover:bg-muted transition-all duration-200 hover:scale-105"
+              className="bg-card rounded-2xl p-4 flex flex-col items-center gap-2 hover:scale-105 transition-transform"
             >
-              <div className={`w-12 h-12 rounded-xl ${bgColor} flex items-center justify-center`}>
-                <Icon className="w-6 h-6 text-white" />
+              <div className={`w-11 h-11 rounded-full ${color} flex items-center justify-center`}>
+                <Icon className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xs font-medium text-foreground">{label}</span>
+              <span className="text-sm font-semibold text-foreground text-center">{label}</span>
+              <span className="text-[11px] text-muted-foreground text-center leading-none">{sub}</span>
             </Link>
           ))}
         </div>
 
-        {/* Bottom Earning Banner */}
+        {/* Bottom banner */}
         <Link to="/refer" className="block">
           <div
-            className="relative rounded-2xl overflow-hidden h-36 bg-cover bg-right"
+            className="relative rounded-2xl overflow-hidden h-40 bg-cover bg-center"
             style={{ backgroundImage: `url(${earningBanner})` }}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
-            <div className="relative p-4 h-full flex flex-col justify-center max-w-[60%]">
-              <p className="text-white text-lg font-semibold leading-tight">
-                Don't just scroll<br />
-                start earning with <span className="text-primary">RedPay</span> today!
+            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/40 to-transparent" />
+            <div className="relative p-4 h-full flex flex-col justify-center max-w-[65%]">
+              <p className="text-white text-xl font-extrabold leading-tight">
+                Start earning with<br />
+                <span className="text-primary">RedPay</span> today!
               </p>
-              <p className="text-muted-foreground text-xs mt-2">
-                Turn your phone into your money machine.
+              <p className="text-white text-sm font-semibold mt-2 leading-tight">
+                Turn your phone into<br />your money machine.
               </p>
+            </div>
+            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5">
+              {[0, 1, 2, 3].map(i => (
+                <span
+                  key={i}
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === bannerIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/50'
+                  }`}
+                />
+              ))}
             </div>
           </div>
         </Link>
       </div>
     </PageContainer>
-
   );
 };
 
