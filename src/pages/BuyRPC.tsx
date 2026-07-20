@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/PageContainer';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-type Step = 'notice' | 'form' | 'processing' | 'payment' | 'upload' | 'success';
+type Step = 'notice' | 'form' | 'processing' | 'payment' | 'upload' | 'review';
 
 const BuyRPC: React.FC = () => {
   const navigate = useNavigate();
