@@ -26,7 +26,7 @@ import { toast } from 'sonner';
 import earningBanner from '@/assets/earning-banner.jpg';
 
 const Dashboard: React.FC = () => {
-  const { user, isAuthenticated, loading, logout, refreshUser } = useAuth();
+  const { user, isAuthenticated, isAdmin, loading, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [canClaim, setCanClaim] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
@@ -112,7 +112,7 @@ const Dashboard: React.FC = () => {
               </span>
             </button>
             <button
-              onClick={logout}
+              onClick={() => navigate(isAdmin ? '/admin' : '/refer')}
               className="flex items-center gap-2 pl-3 pr-1 py-1 rounded-full border border-primary/60 bg-card"
               aria-label="Account"
             >
@@ -128,9 +128,12 @@ const Dashboard: React.FC = () => {
 
         {/* Trust row */}
         <div className="flex items-center justify-around py-1">
-          <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+          <button
+            onClick={() => isAdmin ? navigate('/admin') : toast.success('Your account is secured')}
+            className="flex items-center gap-1.5 text-muted-foreground text-sm"
+          >
             <ShieldCheck className="w-4 h-4 text-green-500" /> Secured
-          </div>
+          </button>
           <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
             <Zap className="w-4 h-4 text-yellow-400" /> Instant
           </div>
