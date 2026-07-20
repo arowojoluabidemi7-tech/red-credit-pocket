@@ -654,6 +654,18 @@ const Admin: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Receipt viewer */}
+      <Dialog open={!!viewReceipt} onOpenChange={(o) => !o && setViewReceipt(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Payment Receipt</DialogTitle>
+          </DialogHeader>
+          {viewReceipt && (
+            <img src={viewReceipt} alt="Payment receipt" className="w-full h-auto rounded-lg" />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
