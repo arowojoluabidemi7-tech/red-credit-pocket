@@ -116,7 +116,16 @@ const Admin: React.FC = () => {
     setProfiles((p as AdminProfile[]) || []);
     setRoles((r as RoleRow[]) || []);
     setAudits((a as AuditRow[]) || []);
-    setDeposits((d as Deposit[]) || []);
+    const deps = (d as Deposit[]) || [];
+    setDeposits(deps);
+
+    // Generate signed URLs for receipts
+    const urls: Record<string, string> = {};
+    await Promise.all(deps.filter((x) => x.screenshot_url).map(async (x) => {
+      const { data: signed } = await db.storage.from('receipts').createSignedUrl(x.screenshot_url!, 3600);
+      if (signed?.signedUrl) urls[x.id] = signed.signedUrl;
+    }));
+    setReceiptUrls(urls);
   };
 
   const logAction = async (action: string, target?: string, details?: Record<string, unknown>) => {
