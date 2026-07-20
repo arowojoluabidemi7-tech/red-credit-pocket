@@ -71,7 +71,7 @@ interface Deposit {
   id: string; user_id: string; user_email: string | null; user_name: string | null;
   amount: number; reference: string; bank_name: string | null; note: string | null;
   status: 'pending' | 'approved' | 'rejected'; admin_note: string | null;
-  reviewed_at: string | null; created_at: string;
+  reviewed_at: string | null; created_at: string; screenshot_url: string | null;
 }
 
 type Tab = 'overview' | 'users' | 'payments' | 'audit';
@@ -85,6 +85,8 @@ const Admin: React.FC = () => {
   const [roles, setRoles] = useState<RoleRow[]>([]);
   const [audits, setAudits] = useState<AuditRow[]>([]);
   const [deposits, setDeposits] = useState<Deposit[]>([]);
+  const [receiptUrls, setReceiptUrls] = useState<Record<string, string>>({});
+  const [viewReceipt, setViewReceipt] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [busy, setBusy] = useState(false);
 
