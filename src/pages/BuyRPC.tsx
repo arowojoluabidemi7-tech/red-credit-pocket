@@ -32,7 +32,11 @@ const BuyRPC: React.FC = () => {
   const [copied, setCopied] = useState<string | null>(null);
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [referenceId] = useState(`REF${generateId()}`);
-  const [rpcCode, setRpcCode] = useState('');
+  const [rpcCode] = useState('RPC6097');
+  const [depositId, setDepositId] = useState<string | null>(null);
+  const [depositStatus, setDepositStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
+  const [adminNote, setAdminNote] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -62,43 +66,70 @@ const BuyRPC: React.FC = () => {
       toast.error('Please upload payment screenshot');
       return;
     }
+    if (!user?.id) return;
+    setSubmitting(true);
 
-    // Save RPC payment (local)
-    storage.addRpcPayment({
-      userId: user?.id || '',
-      amount: RPC_PRICE,
-      reference: referenceId,
-      status: 'pending',
-      rpcCode: 'RPC708901',
+    // Upload screenshot to receipts bucket
+    let screenshotUrl: string | null = null;
+    const ext = screenshot.name.split('.').pop() || 'jpg';
+    const path = `${user.id}/${referenceId}.${ext}`;
+    const { error: upErr } = await db.storage.from('receipts').upload(path, screenshot, {
+      upsert: true, contentType: screenshot.type,
     });
-
-    storage.addTransaction({
-      userId: user?.id || '',
-      type: 'rpc_purchase',
-      amount: RPC_PRICE,
-      status: 'pending',
-      description: 'RPC Purchase',
-      reference: referenceId,
-    });
-
-    // Submit to admin queue
-    if (user?.id) {
-      const { error } = await db.from('deposits').insert({
-        user_id: user.id,
-        user_email: user.email,
-        user_name: `${user.firstName} ${user.lastName}`,
-        amount: RPC_PRICE,
-        reference: referenceId,
-        bank_name: PAYMENT_DETAILS.bankName,
-        note: 'RPC Purchase',
-        status: 'pending',
-      });
-      if (error) console.error('deposit insert', error);
+    if (upErr) {
+      setSubmitting(false);
+      toast.error('Upload failed: ' + upErr.message);
+      return;
     }
+    screenshotUrl = path;
 
-    setRpcCode('RPC708901');
-    setStep('success');
+    // Local records
+    storage.addRpcPayment({
+      userId: user.id, amount: RPC_PRICE, reference: referenceId, status: 'pending', rpcCode,
+    });
+    storage.addTransaction({
+      userId: user.id, type: 'rpc_purchase', amount: RPC_PRICE, status: 'pending',
+      description: 'RPC Purchase', reference: referenceId,
+    });
+
+    // Admin queue
+    const { data, error } = await db.from('deposits').insert({
+      user_id: user.id,
+      user_email: user.email,
+      user_name: `${user.firstName} ${user.lastName}`,
+      amount: RPC_PRICE,
+      reference: referenceId,
+      bank_name: PAYMENT_DETAILS.bankName,
+      note: 'RPC Purchase',
+      status: 'pending',
+      screenshot_url: screenshotUrl,
+    }).select('id').single();
+
+    setSubmitting(false);
+    if (error) {
+      toast.error('Submit failed: ' + error.message);
+      return;
+    }
+    setDepositId(data.id);
+    setDepositStatus('pending');
+    setStep('review');
   };
+
+  // Poll deposit status while under review
+  useEffect(() => {
+    if (step !== 'review' || !depositId) return;
+    let alive = true;
+    const check = async () => {
+      const { data } = await db.from('deposits')
+        .select('status, admin_note').eq('id', depositId).single();
+      if (!alive || !data) return;
+      setDepositStatus(data.status);
+      setAdminNote(data.admin_note);
+    };
+    check();
+    const iv = setInterval(check, 5000);
+    return () => { alive = false; clearInterval(iv); };
+  }, [step, depositId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
