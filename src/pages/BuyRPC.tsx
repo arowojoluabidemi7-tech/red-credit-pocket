@@ -280,6 +280,35 @@ const BuyRPC: React.FC = () => {
           </div>
         )}
 
+        {step === 'choose' && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="text-center space-y-1">
+              <h2 className="text-2xl font-bold text-foreground">Buy RPC</h2>
+              <p className="text-sm text-muted-foreground">Choose your purchase method</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={() => handleChooseTier('online')}
+                className="gradient-card rounded-2xl p-6 text-center border-2 border-primary/40 hover:border-primary transition-all hover:scale-[1.02]"
+              >
+                <Coins className="w-10 h-10 mx-auto mb-3 text-primary" />
+                <div className="text-lg font-bold text-foreground">Buy Online</div>
+                <div className="text-xs text-muted-foreground mb-3">Online</div>
+                <div className="text-2xl font-extrabold text-primary">₦6,700</div>
+              </button>
+              <button
+                onClick={() => handleChooseTier('offline')}
+                className="gradient-card rounded-2xl p-6 text-center border-2 border-border hover:border-primary transition-all hover:scale-[1.02]"
+              >
+                <Coins className="w-10 h-10 mx-auto mb-3 text-foreground" />
+                <div className="text-lg font-bold text-foreground">Buy Offline</div>
+                <div className="text-xs text-muted-foreground mb-3">Offline</div>
+                <div className="text-2xl font-extrabold text-foreground">₦8,700</div>
+              </button>
+            </div>
+          </div>
+        )}
+
         {step === 'payment' && (
           <div className="space-y-6 animate-fade-in">
             {/* Payment Details */}
