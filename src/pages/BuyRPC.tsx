@@ -4,7 +4,7 @@ import { PageContainer } from '@/components/PageContainer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
-import { RPC_PRICE, PAYMENT_DETAILS, SUPPORT } from '@/lib/constants';
+import { PAYMENT_DETAILS, SUPPORT } from '@/lib/constants';
 import { storage, generateId } from '@/lib/store';
 import { db } from '@/lib/db';
 import { ArrowLeft, Coins, Copy, CheckCircle, Upload, AlertTriangle, X, Clock, MessageCircle, Loader2 } from 'lucide-react';
@@ -16,13 +16,17 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-type Step = 'notice' | 'form' | 'processing' | 'payment' | 'upload' | 'review';
+type Step = 'notice' | 'form' | 'processing' | 'choose' | 'payment' | 'upload' | 'review';
+type Tier = 'online' | 'offline';
+const TIER_PRICES: Record<Tier, number> = { online: 6700, offline: 8700 };
 
 const BuyRPC: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [step, setStep] = useState<Step>('notice');
   const [showNotice, setShowNotice] = useState(true);
+  const [tier, setTier] = useState<Tier>('online');
+  const price = TIER_PRICES[tier];
   const [showWhatsAppWarning, setShowWhatsAppWarning] = useState(false);
   const [formData, setFormData] = useState({
     fullName: user ? `${user.firstName} ${user.lastName}` : '',
@@ -32,7 +36,7 @@ const BuyRPC: React.FC = () => {
   const [copied, setCopied] = useState<string | null>(null);
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [referenceId] = useState(`REF${generateId()}`);
-  const [rpcCode] = useState('RPC6097');
+  const [rpcCode] = useState(isAdmin ? 'RPC6098' : 'RPC6097');
   const [depositId, setDepositId] = useState<string | null>(null);
   const [depositStatus, setDepositStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
   const [adminNote, setAdminNote] = useState<string | null>(null);
@@ -57,8 +61,13 @@ const BuyRPC: React.FC = () => {
     }
     setStep('processing');
     setTimeout(() => {
-      setStep('payment');
+      setStep('choose');
     }, 3000);
+  };
+
+  const handleChooseTier = (t: Tier) => {
+    setTier(t);
+    setStep('payment');
   };
 
   const handlePaymentMade = async () => {
@@ -85,10 +94,10 @@ const BuyRPC: React.FC = () => {
 
     // Local records
     storage.addRpcPayment({
-      userId: user.id, amount: RPC_PRICE, reference: referenceId, status: 'pending', rpcCode,
+      userId: user.id, amount: price, reference: referenceId, status: 'pending', rpcCode,
     });
     storage.addTransaction({
-      userId: user.id, type: 'rpc_purchase', amount: RPC_PRICE, status: 'pending',
+      userId: user.id, type: 'rpc_purchase', amount: price, status: 'pending',
       description: 'RPC Purchase', reference: referenceId,
     });
 
@@ -97,7 +106,7 @@ const BuyRPC: React.FC = () => {
       user_id: user.id,
       user_email: user.email,
       user_name: `${user.firstName} ${user.lastName}`,
-      amount: RPC_PRICE,
+      amount: price,
       reference: referenceId,
       bank_name: PAYMENT_DETAILS.bankName,
       note: 'RPC Purchase',
@@ -142,6 +151,48 @@ const BuyRPC: React.FC = () => {
   if (!user) {
     navigate('/');
     return null;
+  }
+
+  if (isAdmin) {
+    return (
+      <PageContainer>
+        <div className="p-4 space-y-6">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/admin')}
+              className="p-2 rounded-lg bg-card hover:bg-muted transition-colors"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div>
+              <h1 className="text-xl font-bold">Buy RPC</h1>
+              <p className="text-sm text-muted-foreground">Admin</p>
+            </div>
+          </div>
+
+          <div className="space-y-6 animate-scale-in text-center py-8">
+            <div className="w-20 h-20 mx-auto rounded-full bg-green-500/20 flex items-center justify-center">
+              <CheckCircle className="w-10 h-10 text-green-500" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-green-500">Payment Confirmed</h2>
+              <p className="text-muted-foreground">Your RPC is</p>
+            </div>
+            <div className="glass-card rounded-xl p-6 space-y-3">
+              <div className="flex items-center justify-center gap-2">
+                <div className="text-3xl font-mono font-bold text-primary">RPC6098</div>
+                <button onClick={() => copyToClipboard('RPC6098', 'RPC code')}>
+                  {copied === 'RPC code' ? <CheckCircle size={18} className="text-success" /> : <Copy size={18} className="text-muted-foreground" />}
+                </button>
+              </div>
+            </div>
+            <Button size="lg" className="w-full" onClick={() => navigate('/admin')}>
+              Back to Admin Panel
+            </Button>
+          </div>
+        </div>
+      </PageContainer>
+    );
   }
 
   return (
@@ -208,7 +259,7 @@ const BuyRPC: React.FC = () => {
             <div className="gradient-card rounded-2xl p-6 text-center">
               <Coins className="w-12 h-12 mx-auto mb-4 text-primary" />
               <p className="text-sm text-muted-foreground mb-2">Amount to Pay</p>
-              <div className="text-3xl font-bold text-foreground">₦{RPC_PRICE.toLocaleString()}</div>
+              <div className="text-3xl font-bold text-foreground">₦{price.toLocaleString()}</div>
             </div>
 
             {/* User Info */}
@@ -271,12 +322,41 @@ const BuyRPC: React.FC = () => {
           </div>
         )}
 
+        {step === 'choose' && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="text-center space-y-1">
+              <h2 className="text-2xl font-bold text-foreground">Buy RPC</h2>
+              <p className="text-sm text-muted-foreground">Choose your purchase method</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={() => handleChooseTier('online')}
+                className="gradient-card rounded-2xl p-6 text-center border-2 border-primary/40 hover:border-primary transition-all hover:scale-[1.02]"
+              >
+                <Coins className="w-10 h-10 mx-auto mb-3 text-primary" />
+                <div className="text-lg font-bold text-foreground">Buy Online</div>
+                <div className="text-xs text-muted-foreground mb-3">Online</div>
+                <div className="text-2xl font-extrabold text-primary">₦6,700</div>
+              </button>
+              <button
+                onClick={() => handleChooseTier('offline')}
+                className="gradient-card rounded-2xl p-6 text-center border-2 border-border hover:border-primary transition-all hover:scale-[1.02]"
+              >
+                <Coins className="w-10 h-10 mx-auto mb-3 text-foreground" />
+                <div className="text-lg font-bold text-foreground">Buy Offline</div>
+                <div className="text-xs text-muted-foreground mb-3">Offline</div>
+                <div className="text-2xl font-extrabold text-foreground">₦8,700</div>
+              </button>
+            </div>
+          </div>
+        )}
+
         {step === 'payment' && (
           <div className="space-y-6 animate-fade-in">
             {/* Payment Details */}
             <div className="gradient-card rounded-2xl p-6 text-center">
               <p className="text-sm text-muted-foreground mb-2">Amount to Pay</p>
-              <div className="text-3xl font-bold text-foreground mb-4">₦{RPC_PRICE.toLocaleString()}</div>
+              <div className="text-3xl font-bold text-foreground mb-4">₦{price.toLocaleString()}</div>
             </div>
 
             <div className="bg-card rounded-xl p-4 space-y-4">
