@@ -16,13 +16,17 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-type Step = 'notice' | 'form' | 'processing' | 'payment' | 'upload' | 'review';
+type Step = 'notice' | 'form' | 'processing' | 'choose' | 'payment' | 'upload' | 'review';
+type Tier = 'online' | 'offline';
+const TIER_PRICES: Record<Tier, number> = { online: 6700, offline: 8700 };
 
 const BuyRPC: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [step, setStep] = useState<Step>('notice');
   const [showNotice, setShowNotice] = useState(true);
+  const [tier, setTier] = useState<Tier>('online');
+  const price = TIER_PRICES[tier];
   const [showWhatsAppWarning, setShowWhatsAppWarning] = useState(false);
   const [formData, setFormData] = useState({
     fullName: user ? `${user.firstName} ${user.lastName}` : '',
