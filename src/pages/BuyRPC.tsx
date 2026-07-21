@@ -195,47 +195,6 @@ const BuyRPC: React.FC = () => {
 
   return (
     <PageContainer>
-      {/* Payment Notice Dialog */}
-      <Dialog open={showNotice} onOpenChange={setShowNotice}>
-        <DialogContent className="bg-card border-border max-w-sm mx-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-foreground">
-              <AlertTriangle className="w-6 h-6 text-yellow-500" />
-              Important Payment Notice
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 text-foreground">
-            <p>
-              Transfer the <strong>exact amount</strong> shown on this page.
-            </p>
-            <p>
-              Upload a clear <strong>payment screenshot</strong> immediately after transfer.
-            </p>
-            <div className="flex items-start gap-2 text-destructive">
-              <AlertTriangle className="w-5 h-5 mt-0.5 flex-shrink-0" />
-              <p>
-                <strong>Avoid using Opay bank.</strong> Due to temporary network issues from Opay servers, payments made with Opay may not be confirmed. Please use <strong>any other Nigerian bank</strong> for instant confirmation.
-              </p>
-            </div>
-            <p className="flex items-start gap-2 text-green-500">
-              <CheckCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
-              Payments made with other banks are confirmed within minutes.
-            </p>
-            <p className="flex items-start gap-2 text-destructive">
-              <X className="w-5 h-5 mt-0.5 flex-shrink-0" />
-              Do not dispute your payment under any circumstances — disputes delay confirmation.
-            </p>
-          </div>
-          <Button 
-            size="lg" 
-            className="w-full mt-4" 
-            onClick={handleUnderstand}
-          >
-            I Understand
-          </Button>
-        </DialogContent>
-      </Dialog>
-
       <div className="p-4 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
