@@ -94,10 +94,10 @@ const BuyRPC: React.FC = () => {
 
     // Local records
     storage.addRpcPayment({
-      userId: user.id, amount: RPC_PRICE, reference: referenceId, status: 'pending', rpcCode,
+      userId: user.id, amount: price, reference: referenceId, status: 'pending', rpcCode,
     });
     storage.addTransaction({
-      userId: user.id, type: 'rpc_purchase', amount: RPC_PRICE, status: 'pending',
+      userId: user.id, type: 'rpc_purchase', amount: price, status: 'pending',
       description: 'RPC Purchase', reference: referenceId,
     });
 
@@ -106,7 +106,7 @@ const BuyRPC: React.FC = () => {
       user_id: user.id,
       user_email: user.email,
       user_name: `${user.firstName} ${user.lastName}`,
-      amount: RPC_PRICE,
+      amount: price,
       reference: referenceId,
       bank_name: PAYMENT_DETAILS.bankName,
       note: 'RPC Purchase',
@@ -217,7 +217,7 @@ const BuyRPC: React.FC = () => {
             <div className="gradient-card rounded-2xl p-6 text-center">
               <Coins className="w-12 h-12 mx-auto mb-4 text-primary" />
               <p className="text-sm text-muted-foreground mb-2">Amount to Pay</p>
-              <div className="text-3xl font-bold text-foreground">₦{RPC_PRICE.toLocaleString()}</div>
+              <div className="text-3xl font-bold text-foreground">₦{price.toLocaleString()}</div>
             </div>
 
             {/* User Info */}
@@ -285,7 +285,7 @@ const BuyRPC: React.FC = () => {
             {/* Payment Details */}
             <div className="gradient-card rounded-2xl p-6 text-center">
               <p className="text-sm text-muted-foreground mb-2">Amount to Pay</p>
-              <div className="text-3xl font-bold text-foreground mb-4">₦{RPC_PRICE.toLocaleString()}</div>
+              <div className="text-3xl font-bold text-foreground mb-4">₦{price.toLocaleString()}</div>
             </div>
 
             <div className="bg-card rounded-xl p-4 space-y-4">
