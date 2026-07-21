@@ -48,11 +48,6 @@ const BuyRPC: React.FC = () => {
     setTimeout(() => setCopied(null), 2000);
   };
 
-  const handleUnderstand = () => {
-    setShowNotice(false);
-    setStep('form');
-  };
-
   const handleProceed = () => {
     if (!formData.fullName || !formData.email || !formData.phone) {
       toast.error('Please fill in all fields');
@@ -61,10 +56,14 @@ const BuyRPC: React.FC = () => {
     setStep('processing');
     setTimeout(() => {
       setStep('choose');
-    }, 3000);
+    }, 2000);
   };
 
   const handleChooseTier = (t: Tier) => {
+    if (t === 'offline') {
+      window.open(SUPPORT.telegram, '_blank');
+      return;
+    }
     setTier(t);
     setStep('payment');
   };
