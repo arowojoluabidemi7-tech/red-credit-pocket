@@ -4,7 +4,7 @@ import { PageContainer } from '@/components/PageContainer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
-import { RPC_PRICE, PAYMENT_DETAILS, SUPPORT } from '@/lib/constants';
+import { PAYMENT_DETAILS, SUPPORT } from '@/lib/constants';
 import { storage, generateId } from '@/lib/store';
 import { db } from '@/lib/db';
 import { ArrowLeft, Coins, Copy, CheckCircle, Upload, AlertTriangle, X, Clock, MessageCircle, Loader2 } from 'lucide-react';
