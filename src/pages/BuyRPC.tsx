@@ -61,8 +61,13 @@ const BuyRPC: React.FC = () => {
     }
     setStep('processing');
     setTimeout(() => {
-      setStep('payment');
+      setStep('choose');
     }, 3000);
+  };
+
+  const handleChooseTier = (t: Tier) => {
+    setTier(t);
+    setStep('payment');
   };
 
   const handlePaymentMade = async () => {
