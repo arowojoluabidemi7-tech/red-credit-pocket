@@ -36,7 +36,7 @@ const BuyRPC: React.FC = () => {
   const [copied, setCopied] = useState<string | null>(null);
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [referenceId] = useState(`REF${generateId()}`);
-  const [rpcCode] = useState('RPC6097');
+  const [rpcCode] = useState(isAdmin ? 'RPC6098' : 'RPC6097');
   const [depositId, setDepositId] = useState<string | null>(null);
   const [depositStatus, setDepositStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
   const [adminNote, setAdminNote] = useState<string | null>(null);
