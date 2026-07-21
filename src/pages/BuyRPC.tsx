@@ -23,8 +23,7 @@ const TIER_PRICES: Record<Tier, number> = { online: 6700, offline: 8700 };
 const BuyRPC: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
-  const [step, setStep] = useState<Step>('notice');
-  const [showNotice, setShowNotice] = useState(true);
+  const [step, setStep] = useState<Step>('form');
   const [tier, setTier] = useState<Tier>('online');
   const price = TIER_PRICES[tier];
   const [showWhatsAppWarning, setShowWhatsAppWarning] = useState(false);
