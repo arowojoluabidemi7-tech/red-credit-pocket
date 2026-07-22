@@ -21,12 +21,13 @@ import {
   BadgeCheck,
   TrendingUp,
   Sparkles,
+  LogOut,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import earningBanner from '@/assets/earning-banner.jpg';
 
 const Dashboard: React.FC = () => {
-  const { user, isAuthenticated, isAdmin, loading, refreshUser } = useAuth();
+  const { user, isAuthenticated, isAdmin, loading, refreshUser, logout } = useAuth();
   const navigate = useNavigate();
   const [canClaim, setCanClaim] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
