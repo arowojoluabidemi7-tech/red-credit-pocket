@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { PAYMENT_DETAILS, SUPPORT } from '@/lib/constants';
 import { storage, generateId } from '@/lib/store';
 import { db } from '@/lib/db';
-import { ArrowLeft, Coins, Copy, CheckCircle, Upload, AlertTriangle, X, Clock, MessageCircle, Loader2, Lock } from 'lucide-react';
+import { ArrowLeft, Coins, Copy, CheckCircle, Upload, AlertTriangle, X, Clock, MessageCircle, Loader2, Lock, User as UserIcon, Mail, Phone, ShieldCheck, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
