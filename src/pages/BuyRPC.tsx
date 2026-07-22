@@ -394,26 +394,59 @@ const BuyRPC: React.FC = () => {
         )}
 
         {step === 'review' && depositStatus === 'approved' && (
-          <div className="space-y-6 animate-scale-in text-center py-8">
-            <div className="w-20 h-20 mx-auto rounded-full bg-green-500/20 flex items-center justify-center">
-              <CheckCircle className="w-10 h-10 text-green-500" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-green-500">Payment Confirmed</h2>
-              <p className="text-muted-foreground">Your RPC has been credited to your account.</p>
-            </div>
-            <div className="glass-card rounded-xl p-6 space-y-3">
-              <p className="text-sm text-muted-foreground">Your RPC Code</p>
-              <div className="flex items-center justify-center gap-2">
-                <div className="text-2xl font-mono font-bold text-primary">{rpcCode}</div>
-                <button onClick={() => copyToClipboard(rpcCode, 'RPC code')}>
-                  {copied === 'RPC code' ? <CheckCircle size={18} className="text-success" /> : <Copy size={18} className="text-muted-foreground" />}
+          <div className="space-y-5 animate-scale-in py-4">
+            {/* Access Code Card */}
+            <div className="bg-red-50 rounded-2xl p-5 space-y-3 border border-red-100">
+              <p className="text-sm text-center text-red-500 font-medium">Your RPC Access Code:</p>
+              <div className="flex items-center justify-center gap-3">
+                <div className="bg-white rounded-xl px-5 py-3 shadow-sm flex items-center gap-2">
+                  <span className="text-2xl font-mono font-bold text-black">{rpcCode}</span>
+                </div>
+                <button
+                  onClick={() => copyToClipboard(rpcCode, 'RPC code')}
+                  className="bg-white rounded-xl p-3 shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  {copied === 'RPC code' ? <CheckCircle size={20} className="text-green-500" /> : <Copy size={20} className="text-gray-600" />}
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground">Reference: {referenceId}</p>
             </div>
-            <Button size="lg" className="w-full" onClick={() => navigate('/dashboard')}>
-              Go to Dashboard
+
+            {/* Activation Required Card */}
+            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-5 border border-yellow-200">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                <h3 className="text-lg font-bold text-red-500 uppercase tracking-wide">Activation Required</h3>
+                <AlertTriangle className="w-5 h-5 text-yellow-600" />
+              </div>
+              
+              <div className="bg-white/80 rounded-xl p-4 space-y-3">
+                <div className="flex items-start gap-2">
+                  <span className="text-red-500 text-lg leading-none">🚫</span>
+                  <p className="text-sm text-red-500 font-medium">
+                    Your RPC code will <span className="font-bold underline">NOT WORK</span> until activated!
+                  </p>
+                </div>
+                <p className="text-sm text-gray-600 text-center">
+                  You <span className="text-red-500 font-bold">won't be credited</span> and <span className="text-red-500 font-bold">cannot withdraw</span> until your code is activated on our portal.
+                </p>
+              </div>
+              
+              <button
+                onClick={() => window.open('https://v0-red-pay-activation-app-tr.vercel.app/', '_blank')}
+                className="mt-4 w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg hover:opacity-95 transition-opacity"
+              >
+                <Lock className="w-5 h-5" />
+                TAP HERE TO ACTIVATE NOW
+              </button>
+              
+              <p className="text-xs text-red-500 text-center mt-3 flex items-center justify-center gap-1">
+                <Clock className="w-3 h-3" />
+                Activate immediately to start earning!
+              </p>
+            </div>
+
+            <Button size="lg" className="w-full bg-red-600 hover:bg-red-700" onClick={() => navigate('/dashboard')}>
+              Back to Dashboard
             </Button>
           </div>
         )}
