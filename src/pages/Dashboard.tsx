@@ -96,8 +96,9 @@ const Dashboard: React.FC = () => {
   const shortId = user.id.replace(/-/g, '').slice(0, 10);
 
   return (
-    <PageContainer>
+    <PageContainer showNav={false}>
       <div className="p-4 space-y-4">
+
         {/* Header */}
         <div className="flex items-center justify-between">
           <Logo size="sm" />
