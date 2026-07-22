@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { PAYMENT_DETAILS, SUPPORT } from '@/lib/constants';
 import { storage, generateId } from '@/lib/store';
 import { db } from '@/lib/db';
-import { ArrowLeft, Coins, Copy, CheckCircle, Upload, AlertTriangle, X, Clock, MessageCircle, Loader2, Lock } from 'lucide-react';
+import { ArrowLeft, Coins, Copy, CheckCircle, Upload, AlertTriangle, X, Clock, MessageCircle, Loader2, Lock, User as UserIcon, Mail, Phone, ShieldCheck, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -215,63 +215,102 @@ const BuyRPC: React.FC = () => {
         </div>
 
         {step === 'form' && (
-          <div className="space-y-6 animate-fade-in">
-            {/* Amount Card */}
-            <div className="gradient-card rounded-2xl p-6 text-center">
-              <Coins className="w-12 h-12 mx-auto mb-4 text-primary" />
-              <p className="text-sm text-muted-foreground mb-2">Amount to Pay</p>
-              <div className="text-3xl font-bold text-foreground">₦{price.toLocaleString()}</div>
+          <div className="space-y-5 animate-fade-in">
+            {/* Hero Amount Card */}
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-500 via-red-600 to-red-800 p-6 shadow-xl">
+              <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-20 -left-10 w-40 h-40 rounded-full bg-yellow-300/10 blur-2xl" />
+              <div className="relative">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 text-white text-[11px] font-semibold mb-3">
+                  <Sparkles size={12} /> RedPay Credit
+                </div>
+                <p className="text-white/80 text-sm">Amount to Pay</p>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-4xl font-extrabold text-white">₦{price.toLocaleString()}</span>
+                  <span className="text-white/70 text-xs">one-time</span>
+                </div>
+                <div className="flex items-center gap-2 mt-4 text-white/90 text-xs">
+                  <ShieldCheck size={14} /> Secure • Verified • Instant activation
+                </div>
+              </div>
             </div>
 
-            {/* User Info */}
-            <div className="glass-card rounded-xl p-4 space-y-3">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Referral Code</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono font-medium text-primary">{user.referralCode}</span>
+            {/* Referral / ID chips */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-card border border-border p-3">
+                <p className="text-[11px] text-muted-foreground mb-1">Referral Code</p>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono font-bold text-primary text-sm truncate">{user.referralCode}</span>
                   <button onClick={() => copyToClipboard(user.referralCode, 'Referral code')}>
                     {copied === 'Referral code' ? <CheckCircle size={14} className="text-success" /> : <Copy size={14} className="text-muted-foreground" />}
                   </button>
                 </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">User ID</span>
-                <span className="font-mono">{user.id}</span>
+              <div className="rounded-2xl bg-card border border-border p-3">
+                <p className="text-[11px] text-muted-foreground mb-1">User ID</p>
+                <span className="font-mono text-xs text-foreground">{user.id.slice(0, 12)}…</span>
               </div>
             </div>
 
-            {/* Form */}
-            <div className="space-y-4">
+            {/* Form card */}
+            <div className="rounded-3xl bg-card border border-border p-5 space-y-4">
               <div>
-                <label className="text-sm text-muted-foreground mb-1 block">Full Name</label>
-                <Input
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                />
+                <h3 className="font-bold text-foreground">Confirm your details</h3>
+                <p className="text-xs text-muted-foreground">We use this to activate your RPC code.</p>
               </div>
-              <div>
-                <label className="text-sm text-muted-foreground mb-1 block">Email</label>
-                <Input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="text-sm text-muted-foreground mb-1 block">Phone Number</label>
-                <Input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                />
+
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Full Name</label>
+                  <div className="relative">
+                    <UserIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      className="pl-9 h-12 rounded-xl bg-background"
+                      value={formData.fullName}
+                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                      placeholder="Your full name"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Email Address</label>
+                  <div className="relative">
+                    <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      type="email"
+                      className="pl-9 h-12 rounded-xl bg-background"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="you@email.com"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Phone Number</label>
+                  <div className="relative">
+                    <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      type="tel"
+                      className="pl-9 h-12 rounded-xl bg-background"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="080..."
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
-            <Button size="lg" className="w-full" onClick={handleProceed}>
-              Proceed
+            <Button
+              size="lg"
+              className="w-full h-14 rounded-2xl text-base font-bold bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 shadow-lg shadow-red-500/30"
+              onClick={handleProceed}
+            >
+              Proceed to Payment
             </Button>
           </div>
         )}
+
 
         {step === 'processing' && (
           <div className="flex flex-col items-center justify-center py-20 space-y-6 animate-fade-in">

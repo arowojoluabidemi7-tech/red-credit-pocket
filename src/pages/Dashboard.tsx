@@ -21,12 +21,13 @@ import {
   BadgeCheck,
   TrendingUp,
   Sparkles,
+  LogOut,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import earningBanner from '@/assets/earning-banner.jpg';
 
 const Dashboard: React.FC = () => {
-  const { user, isAuthenticated, isAdmin, loading, refreshUser } = useAuth();
+  const { user, isAuthenticated, isAdmin, loading, refreshUser, logout } = useAuth();
   const navigate = useNavigate();
   const [canClaim, setCanClaim] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
@@ -95,8 +96,9 @@ const Dashboard: React.FC = () => {
   const shortId = user.id.replace(/-/g, '').slice(0, 10);
 
   return (
-    <PageContainer>
+    <PageContainer showNav={false}>
       <div className="p-4 space-y-4">
+
         {/* Header */}
         <div className="flex items-center justify-between">
           <Logo size="sm" />
@@ -123,8 +125,16 @@ const Dashboard: React.FC = () => {
                 {(user.firstName?.[0] || 'U').toUpperCase()}
               </span>
             </button>
+            <button
+              onClick={async () => { await logout(); navigate('/'); }}
+              className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors"
+              aria-label="Log out"
+            >
+              <LogOut className="w-5 h-5 text-foreground" />
+            </button>
           </div>
         </div>
+
 
         {/* Trust row */}
         <div className="flex items-center justify-around py-1">
