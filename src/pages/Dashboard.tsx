@@ -125,8 +125,16 @@ const Dashboard: React.FC = () => {
                 {(user.firstName?.[0] || 'U').toUpperCase()}
               </span>
             </button>
+            <button
+              onClick={async () => { await logout(); navigate('/'); }}
+              className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors"
+              aria-label="Log out"
+            >
+              <LogOut className="w-5 h-5 text-foreground" />
+            </button>
           </div>
         </div>
+
 
         {/* Trust row */}
         <div className="flex items-center justify-around py-1">
