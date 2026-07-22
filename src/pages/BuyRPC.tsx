@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { PAYMENT_DETAILS, SUPPORT } from '@/lib/constants';
 import { storage, generateId } from '@/lib/store';
 import { db } from '@/lib/db';
-import { ArrowLeft, Coins, Copy, CheckCircle, Upload, AlertTriangle, X, Clock, MessageCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, Coins, Copy, CheckCircle, Upload, AlertTriangle, X, Clock, MessageCircle, Loader2, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -205,8 +205,12 @@ const BuyRPC: React.FC = () => {
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-xl font-bold">Buy RPC</h1>
-            <p className="text-sm text-muted-foreground">RedPay Credits</p>
+            <h1 className="text-xl font-bold">
+              {step === 'review' && depositStatus === 'approved' ? 'Payment confirmed' : 'Buy RPC'}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {step === 'review' && depositStatus === 'approved' ? 'Your RPC code is active and ready to use!' : 'RedPay Credits'}
+            </p>
           </div>
         </div>
 
