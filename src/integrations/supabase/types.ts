@@ -52,6 +52,7 @@ export type Database = {
           note: string | null
           reference: string
           reviewed_at: string | null
+          screenshot_url: string | null
           status: string
           user_email: string | null
           user_id: string
@@ -67,6 +68,7 @@ export type Database = {
           note?: string | null
           reference: string
           reviewed_at?: string | null
+          screenshot_url?: string | null
           status?: string
           user_email?: string | null
           user_id: string
@@ -82,6 +84,7 @@ export type Database = {
           note?: string | null
           reference?: string
           reviewed_at?: string | null
+          screenshot_url?: string | null
           status?: string
           user_email?: string | null
           user_id?: string
