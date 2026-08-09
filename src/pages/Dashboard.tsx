@@ -72,14 +72,26 @@ const Dashboard: React.FC = () => {
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
   const formatCurrency = (n: number) => `${currency}${n.toLocaleString()}`;
 
-  const handleClaim = () => {
+  const handleClaim = async () => {
     if (!user || !canClaim) return;
-    if (storage.claimBonus(user.id)) {
-      refreshUser();
-      setCanClaim(false);
-      setTimeLeft(CLAIM_INTERVAL / 1000);
-      toast.success(`${formatCurrency(CLAIM_AMOUNT)} claimed successfully!`);
+    setCanClaim(false);
+
+    const newBalance = Number(user.balance) + CLAIM_AMOUNT;
+    const { error } = await db
+      .from('profiles')
+      .update({ balance: newBalance })
+      .eq('id', user.id);
+
+    if (error) {
+      setCanClaim(true);
+      toast.error('Claim failed. Please try again.');
+      return;
     }
+
+    storage.claimBonus(user.id);
+    await refreshUser();
+    setTimeLeft(CLAIM_INTERVAL / 1000);
+    toast.success(`${formatCurrency(CLAIM_AMOUNT)} added to your balance!`);
   };
 
   const menuItems = [
