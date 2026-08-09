@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Logo } from '@/components/Logo';
 import { COUNTRIES } from '@/lib/constants';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, ChevronDown, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { ArrowLeft, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 const SignUp: React.FC = () => {
