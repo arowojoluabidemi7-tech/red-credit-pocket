@@ -4,6 +4,7 @@ import { PageContainer } from '@/components/PageContainer';
 import { Logo } from '@/components/Logo';
 import { useAuth } from '@/contexts/AuthContext';
 import { storage } from '@/lib/store';
+import { db } from '@/lib/db';
 import { COUNTRIES, CLAIM_AMOUNT, CLAIM_INTERVAL } from '@/lib/constants';
 import {
   Wallet,
