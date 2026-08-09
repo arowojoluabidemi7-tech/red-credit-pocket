@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Logo } from '@/components/Logo';
 import { COUNTRIES } from '@/lib/constants';
 import { useAuth } from '@/contexts/AuthContext';
-import { ChevronDown, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 const GetStarted: React.FC = () => {
@@ -32,7 +32,6 @@ const GetStarted: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showCountrySelect, setShowCountrySelect] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [processingStep, setProcessingStep] = useState<'creating' | 'almost-done' | null>(null);
 
   const selectedCountry = COUNTRIES.find(c => c.code === signUpData.country);
 
@@ -59,10 +58,6 @@ const GetStarted: React.FC = () => {
     }
 
     setIsProcessing(true);
-    setProcessingStep('creating');
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setProcessingStep('almost-done');
-    await new Promise(resolve => setTimeout(resolve, 1000));
 
     const user = signup(signUpData);
     toast.success('Account created successfully!');
@@ -89,28 +84,6 @@ const GetStarted: React.FC = () => {
       toast.error('Invalid email or password');
     }
   };
-
-  if (isProcessing) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
-        <div className="text-center space-y-6 animate-fade-in">
-          <div className="w-20 h-20 mx-auto bg-primary/20 rounded-full flex items-center justify-center">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" />
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-foreground">
-              {processingStep === 'creating' ? 'Creating your account...' : 'Your account is almost done!'}
-            </h2>
-            <p className="text-muted-foreground">
-              {processingStep === 'creating'
-                ? 'Please wait while we set up your account'
-                : 'Just a moment more...'}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center px-6 py-8">

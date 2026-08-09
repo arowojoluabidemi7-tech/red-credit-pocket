@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Logo } from '@/components/Logo';
 import { COUNTRIES } from '@/lib/constants';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, ChevronDown, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { ArrowLeft, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 const SignUp: React.FC = () => {
@@ -24,7 +24,6 @@ const SignUp: React.FC = () => {
   const [showCountrySelect, setShowCountrySelect] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [processingStep, setProcessingStep] = useState<'creating' | 'almost-done' | null>(null);
 
   const selectedCountry = COUNTRIES.find(c => c.code === formData.country);
 
@@ -37,7 +36,6 @@ const SignUp: React.FC = () => {
     }
 
     setIsProcessing(true);
-    setProcessingStep('creating');
 
     const { error, user } = await signup(formData);
     if (error) {
@@ -58,36 +56,9 @@ const SignUp: React.FC = () => {
       return;
     }
 
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setProcessingStep('almost-done');
-    await new Promise(resolve => setTimeout(resolve, 800));
-
     toast.success('Account created successfully!');
     navigate('/welcome', { state: { user } });
   };
-
-  // Processing overlay
-  if (isProcessing) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
-        <div className="text-center space-y-6 animate-fade-in">
-          <div className="w-20 h-20 mx-auto bg-primary/20 rounded-full flex items-center justify-center">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" />
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-foreground">
-              {processingStep === 'creating' ? 'Creating your account...' : 'Your account is almost done!'}
-            </h2>
-            <p className="text-muted-foreground">
-              {processingStep === 'creating' 
-                ? 'Please wait while we set up your account' 
-                : 'Just a moment more...'}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background px-6 py-8">

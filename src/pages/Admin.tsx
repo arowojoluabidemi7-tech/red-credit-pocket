@@ -36,6 +36,9 @@ import {
   CreditCard,
   Clock,
   Sparkles,
+  Settings,
+  Building2,
+  Save,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -74,7 +77,7 @@ interface Deposit {
   reviewed_at: string | null; created_at: string; screenshot_url: string | null;
 }
 
-type Tab = 'overview' | 'users' | 'payments' | 'audit';
+type Tab = 'overview' | 'users' | 'payments' | 'audit' | 'settings';
 
 const Admin: React.FC = () => {
   const navigate = useNavigate();
@@ -88,6 +91,8 @@ const Admin: React.FC = () => {
   const [receiptUrls, setReceiptUrls] = useState<Record<string, string>>({});
   const [viewReceipt, setViewReceipt] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [payForm, setPayForm] = useState({ bankName: '', accountNumber: '', accountName: '' });
+  const [savingPay, setSavingPay] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const [selected, setSelected] = useState<AdminProfile | null>(null);
@@ -305,11 +310,50 @@ const Admin: React.FC = () => {
     </div>
   );
 
+  useEffect(() => {
+    (async () => {
+      const { data } = await db
+        .from('site_settings')
+        .select('bank_name, account_number, account_name')
+        .eq('id', 'payment')
+        .maybeSingle();
+      if (data) {
+        setPayForm({
+          bankName: data.bank_name || '',
+          accountNumber: data.account_number || '',
+          accountName: data.account_name || '',
+        });
+      }
+    })();
+  }, []);
+
+  const savePaymentDetails = async () => {
+    if (!payForm.bankName || !payForm.accountNumber || !payForm.accountName) {
+      toast.error('Fill in all account fields');
+      return;
+    }
+    setSavingPay(true);
+    const { error } = await db.from('site_settings').upsert({
+      id: 'payment',
+      bank_name: payForm.bankName,
+      account_number: payForm.accountNumber,
+      account_name: payForm.accountName,
+      updated_at: new Date().toISOString(),
+    });
+    setSavingPay(false);
+    if (error) {
+      toast.error('Save failed: ' + error.message);
+      return;
+    }
+    toast.success('Account details updated');
+  };
+
   const tabs: { id: Tab; label: string; icon: React.ElementType; badge?: number }[] = [
     { id: 'overview', label: 'Overview', icon: Activity },
     { id: 'users', label: 'Users', icon: Users },
     { id: 'payments', label: 'Payments', icon: CreditCard, badge: stats.pendingPay },
     { id: 'audit', label: 'Audit', icon: Shield },
+    { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
   return (
@@ -601,6 +645,52 @@ const Admin: React.FC = () => {
                 )}
               </tbody>
             </table>
+          </div>
+        )}
+        {tab === 'settings' && (
+          <div className="max-w-xl space-y-6">
+            <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-foreground">Payment Account Details</h2>
+                  <p className="text-sm text-muted-foreground">Shown to users on the Buy RPC payment page</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Bank Name</label>
+                  <Input
+                    value={payForm.bankName}
+                    onChange={(e) => setPayForm({ ...payForm, bankName: e.target.value })}
+                    placeholder="e.g. SMARTCASH"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Account Number</label>
+                  <Input
+                    value={payForm.accountNumber}
+                    onChange={(e) => setPayForm({ ...payForm, accountNumber: e.target.value })}
+                    placeholder="e.g. 7055968093"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Account Name</label>
+                  <Input
+                    value={payForm.accountName}
+                    onChange={(e) => setPayForm({ ...payForm, accountName: e.target.value })}
+                    placeholder="e.g. MOSES GIFT"
+                  />
+                </div>
+              </div>
+
+              <Button className="w-full" onClick={savePaymentDetails} disabled={savingPay}>
+                {savingPay ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4 mr-2" /> Save Changes</>}
+              </Button>
+            </div>
           </div>
         )}
       </main>

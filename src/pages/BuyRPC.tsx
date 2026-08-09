@@ -4,7 +4,8 @@ import { PageContainer } from '@/components/PageContainer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
-import { PAYMENT_DETAILS, SUPPORT } from '@/lib/constants';
+import { SUPPORT } from '@/lib/constants';
+import { usePaymentDetails } from '@/hooks/usePaymentDetails';
 import { storage, generateId } from '@/lib/store';
 import { db } from '@/lib/db';
 import { ArrowLeft, Coins, Copy, CheckCircle, Upload, AlertTriangle, X, Clock, MessageCircle, Loader2, Lock, User as UserIcon, Mail, Phone, ShieldCheck, Sparkles } from 'lucide-react';
@@ -21,6 +22,7 @@ type Tier = 'online' | 'offline';
 const TIER_PRICES: Record<Tier, number> = { online: 6700, offline: 8700 };
 
 const BuyRPC: React.FC = () => {
+  const { details: payDetails } = usePaymentDetails();
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
   const [step, setStep] = useState<Step>('form');
@@ -106,7 +108,7 @@ const BuyRPC: React.FC = () => {
       user_name: `${user.firstName} ${user.lastName}`,
       amount: price,
       reference: referenceId,
-      bank_name: PAYMENT_DETAILS.bankName,
+      bank_name: payDetails.bankName,
       note: 'RPC Purchase',
       status: 'pending',
       screenshot_url: screenshotUrl,
@@ -365,20 +367,20 @@ const BuyRPC: React.FC = () => {
               <div className="space-y-3">
                 <div className="flex justify-between items-center py-2 border-b border-border">
                   <span className="text-muted-foreground">Bank Name</span>
-                  <span className="font-medium">{PAYMENT_DETAILS.bankName}</span>
+                  <span className="font-medium">{payDetails.bankName}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-border">
                   <span className="text-muted-foreground">Account Number</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono font-medium">{PAYMENT_DETAILS.accountNumber}</span>
-                    <button onClick={() => copyToClipboard(PAYMENT_DETAILS.accountNumber, 'Account number')}>
+                    <span className="font-mono font-medium">{payDetails.accountNumber}</span>
+                    <button onClick={() => copyToClipboard(payDetails.accountNumber, 'Account number')}>
                       {copied === 'Account number' ? <CheckCircle size={14} className="text-success" /> : <Copy size={14} className="text-muted-foreground" />}
                     </button>
                   </div>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-border">
                   <span className="text-muted-foreground">Account Name</span>
-                  <span className="font-medium">{PAYMENT_DETAILS.accountName}</span>
+                  <span className="font-medium">{payDetails.accountName}</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
                   <span className="text-muted-foreground">Reference ID</span>
