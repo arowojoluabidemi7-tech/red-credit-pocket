@@ -91,7 +91,11 @@ const Admin: React.FC = () => {
   const [receiptUrls, setReceiptUrls] = useState<Record<string, string>>({});
   const [viewReceipt, setViewReceipt] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [payForm, setPayForm] = useState({ bankName: '', accountNumber: '', accountName: '' });
+  const [payForm, setPayForm] = useState({
+    bankName: '', accountNumber: '', accountName: '',
+    supportWhatsapp: '', supportTelegram: '', supportEmail: '',
+    communityWhatsapp: '', communityTelegram: '',
+  });
   const [savingPay, setSavingPay] = useState(false);
   const [busy, setBusy] = useState(false);
 
