@@ -14,55 +14,19 @@ Deno.serve(async (req) => {
     const sql = postgres(dbUrl, { max: 1 });
 
     await sql.unsafe(`
-      ALTER TABLE public.deposits ADD COLUMN IF NOT EXISTS screenshot_url text;
-      DO $$ BEGIN
-        CREATE POLICY "user update own pending deposit" ON public.deposits
-          FOR UPDATE TO authenticated
-          USING (auth.uid() = user_id AND status = 'pending')
-          WITH CHECK (auth.uid() = user_id);
-      EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-      DO $$ BEGIN
-        CREATE POLICY "receipts auth upload" ON storage.objects
-          FOR INSERT TO authenticated WITH CHECK (bucket_id = 'receipts');
-      EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-      DO $$ BEGIN
-        CREATE POLICY "receipts owner read" ON storage.objects
-          FOR SELECT TO authenticated USING (bucket_id = 'receipts' AND owner = auth.uid());
-      EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-      DO $$ BEGIN
-        CREATE POLICY "receipts admin read" ON storage.objects
-          FOR SELECT TO authenticated USING (bucket_id = 'receipts' AND public.has_role(auth.uid(),'admin'));
-      EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+      ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS support_whatsapp text NOT NULL DEFAULT '';
+      ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS support_telegram text NOT NULL DEFAULT '';
+      ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS support_email text NOT NULL DEFAULT '';
+      ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS community_whatsapp text NOT NULL DEFAULT '';
+      ALTER TABLE public.site_settings ADD COLUMN IF NOT EXISTS community_telegram text NOT NULL DEFAULT '';
 
-      CREATE TABLE IF NOT EXISTS public.site_settings (
-        id text PRIMARY KEY,
-        bank_name text NOT NULL DEFAULT '',
-        account_number text NOT NULL DEFAULT '',
-        account_name text NOT NULL DEFAULT '',
-        updated_at timestamptz NOT NULL DEFAULT now()
-      );
-      GRANT SELECT ON public.site_settings TO anon;
-      GRANT SELECT, INSERT, UPDATE ON public.site_settings TO authenticated;
-      GRANT ALL ON public.site_settings TO service_role;
-      ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
-      DO $$ BEGIN
-        CREATE POLICY "anyone read settings" ON public.site_settings
-          FOR SELECT TO anon, authenticated USING (true);
-      EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-      DO $$ BEGIN
-        CREATE POLICY "admin insert settings" ON public.site_settings
-          FOR INSERT TO authenticated WITH CHECK (public.has_role(auth.uid(),'admin'));
-      EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-      DO $$ BEGIN
-        CREATE POLICY "admin update settings" ON public.site_settings
-          FOR UPDATE TO authenticated
-          USING (public.has_role(auth.uid(),'admin'))
-          WITH CHECK (public.has_role(auth.uid(),'admin'));
-      EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
-      INSERT INTO public.site_settings (id, bank_name, account_number, account_name)
-      VALUES ('payment', 'SMARTCASH', '7055968093', 'MOSES GIFT')
-      ON CONFLICT (id) DO NOTHING;
+      UPDATE public.site_settings SET
+        support_whatsapp   = COALESCE(NULLIF(support_whatsapp,''), '27641451346'),
+        support_telegram   = COALESCE(NULLIF(support_telegram,''), 'https://t.me/Redpayagent1'),
+        support_email      = COALESCE(NULLIF(support_email,''), 'redpay313@gmail.com'),
+        community_whatsapp = COALESCE(NULLIF(community_whatsapp,''), 'https://chat.whatsapp.com/EE0IPvPLr28JqRaHFiNbtM?mode=gi_t'),
+        community_telegram = COALESCE(NULLIF(community_telegram,''), 'https://t.me/Redpayagent1')
+      WHERE id = 'payment';
     `);
 
     await sql.end();
