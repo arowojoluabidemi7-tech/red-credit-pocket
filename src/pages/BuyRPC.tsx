@@ -4,7 +4,6 @@ import { PageContainer } from '@/components/PageContainer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
-import { SUPPORT } from '@/lib/constants';
 import { usePaymentDetails } from '@/hooks/usePaymentDetails';
 import { storage, generateId } from '@/lib/store';
 import { db } from '@/lib/db';
@@ -209,12 +208,17 @@ const BuyRPC: React.FC = () => {
           </button>
           <div>
             <h1 className="text-xl font-bold">
-              {step === 'review' && depositStatus === 'approved' ? 'Payment confirmed' : 'Buy RPC'}
+              {step === 'review' && depositStatus === 'approved'
+                ? 'Payment confirmed'
+                : step === 'payment' ? 'Payment Instructions' : 'Buy RPC'}
             </h1>
             <p className="text-sm text-muted-foreground">
-              {step === 'review' && depositStatus === 'approved' ? 'Your RPC code is active and ready to use!' : 'RedPay Credits'}
+              {step === 'review' && depositStatus === 'approved'
+                ? 'Your RPC code is active and ready to use!'
+                : step === 'payment' ? 'Transfer to the account below' : 'RedPay Credits'}
             </p>
           </div>
+
         </div>
 
         {step === 'form' && (
@@ -561,7 +565,7 @@ const BuyRPC: React.FC = () => {
                 className="w-full"
                 onClick={() => {
                   setShowWhatsAppWarning(false);
-                  window.open(`https://wa.me/${SUPPORT.whatsapp.replace('+', '')}?text=Hello, I just made an RPC payment. Reference ID: ${referenceId}`, '_blank');
+                  window.open(`https://wa.me/${payDetails.supportWhatsapp.replace(/[^0-9]/g, '')}?text=Hello, I just made an RPC payment. Reference ID: ${referenceId}`, '_blank');
                 }}
               >
                 <MessageCircle className="w-5 h-5 mr-2" />
