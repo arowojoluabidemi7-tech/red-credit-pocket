@@ -18,12 +18,13 @@ const Welcome: React.FC = () => {
   };
 
   useEffect(() => {
-    const duration = 2200;
+    const duration = 2000;
     const start = performance.now();
-    const from = 0;
+    const from = 1;
     const to = WELCOME_BONUS;
 
     let raf: number;
+    let done = false;
     const animate = (now: number) => {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
@@ -32,20 +33,19 @@ const Welcome: React.FC = () => {
       setDisplayBalance(current);
       if (progress < 1) {
         raf = requestAnimationFrame(animate);
+      } else if (!done) {
+        done = true;
+        navigate('/dashboard');
       }
     };
 
     raf = requestAnimationFrame(animate);
 
-    const redirectTimer = setTimeout(() => {
-      navigate('/dashboard');
-    }, duration + 300);
-
     return () => {
       cancelAnimationFrame(raf);
-      clearTimeout(redirectTimer);
     };
   }, [navigate]);
+
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-12">

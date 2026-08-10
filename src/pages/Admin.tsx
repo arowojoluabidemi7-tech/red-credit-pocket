@@ -91,7 +91,11 @@ const Admin: React.FC = () => {
   const [receiptUrls, setReceiptUrls] = useState<Record<string, string>>({});
   const [viewReceipt, setViewReceipt] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [payForm, setPayForm] = useState({ bankName: '', accountNumber: '', accountName: '' });
+  const [payForm, setPayForm] = useState({
+    bankName: '', accountNumber: '', accountName: '',
+    supportWhatsapp: '', supportTelegram: '', supportEmail: '',
+    communityWhatsapp: '', communityTelegram: '',
+  });
   const [savingPay, setSavingPay] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -314,7 +318,7 @@ const Admin: React.FC = () => {
     (async () => {
       const { data } = await db
         .from('site_settings')
-        .select('bank_name, account_number, account_name')
+        .select('*')
         .eq('id', 'payment')
         .maybeSingle();
       if (data) {
@@ -322,6 +326,11 @@ const Admin: React.FC = () => {
           bankName: data.bank_name || '',
           accountNumber: data.account_number || '',
           accountName: data.account_name || '',
+          supportWhatsapp: data.support_whatsapp || '',
+          supportTelegram: data.support_telegram || '',
+          supportEmail: data.support_email || '',
+          communityWhatsapp: data.community_whatsapp || '',
+          communityTelegram: data.community_telegram || '',
         });
       }
     })();
@@ -338,6 +347,11 @@ const Admin: React.FC = () => {
       bank_name: payForm.bankName,
       account_number: payForm.accountNumber,
       account_name: payForm.accountName,
+      support_whatsapp: payForm.supportWhatsapp,
+      support_telegram: payForm.supportTelegram,
+      support_email: payForm.supportEmail,
+      community_whatsapp: payForm.communityWhatsapp,
+      community_telegram: payForm.communityTelegram,
       updated_at: new Date().toISOString(),
     });
     setSavingPay(false);
@@ -345,8 +359,9 @@ const Admin: React.FC = () => {
       toast.error('Save failed: ' + error.message);
       return;
     }
-    toast.success('Account details updated');
+    toast.success('Settings updated');
   };
+
 
   const tabs: { id: Tab; label: string; icon: React.ElementType; badge?: number }[] = [
     { id: 'overview', label: 'Overview', icon: Activity },
@@ -686,11 +701,70 @@ const Admin: React.FC = () => {
                   />
                 </div>
               </div>
-
-              <Button className="w-full" onClick={savePaymentDetails} disabled={savingPay}>
-                {savingPay ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4 mr-2" /> Save Changes</>}
-              </Button>
             </div>
+
+            <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
+              <div>
+                <h2 className="font-semibold text-foreground">Support Contacts</h2>
+                <p className="text-sm text-muted-foreground">Used on the Support page and payment help buttons</p>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Support WhatsApp Number</label>
+                  <Input
+                    value={payForm.supportWhatsapp}
+                    onChange={(e) => setPayForm({ ...payForm, supportWhatsapp: e.target.value })}
+                    placeholder="e.g. 2348012345678"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Support Telegram Link</label>
+                  <Input
+                    value={payForm.supportTelegram}
+                    onChange={(e) => setPayForm({ ...payForm, supportTelegram: e.target.value })}
+                    placeholder="https://t.me/..."
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Support Email</label>
+                  <Input
+                    value={payForm.supportEmail}
+                    onChange={(e) => setPayForm({ ...payForm, supportEmail: e.target.value })}
+                    placeholder="support@example.com"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
+              <div>
+                <h2 className="font-semibold text-foreground">Community Links</h2>
+                <p className="text-sm text-muted-foreground">Group links shown on the Community page</p>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">WhatsApp Group Link</label>
+                  <Input
+                    value={payForm.communityWhatsapp}
+                    onChange={(e) => setPayForm({ ...payForm, communityWhatsapp: e.target.value })}
+                    placeholder="https://chat.whatsapp.com/..."
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Telegram Channel Link</label>
+                  <Input
+                    value={payForm.communityTelegram}
+                    onChange={(e) => setPayForm({ ...payForm, communityTelegram: e.target.value })}
+                    placeholder="https://t.me/..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            <Button className="w-full" onClick={savePaymentDetails} disabled={savingPay}>
+              {savingPay ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4 mr-2" /> Save All Settings</>}
+            </Button>
+
           </div>
         )}
       </main>

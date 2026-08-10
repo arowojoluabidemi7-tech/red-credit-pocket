@@ -2,19 +2,21 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/PageContainer';
 import { Button } from '@/components/ui/button';
-import { COMMUNITY } from '@/lib/constants';
+import { usePaymentDetails } from '@/hooks/usePaymentDetails';
 import { ArrowLeft, MessageCircle, Send, Users, ExternalLink } from 'lucide-react';
 
 const Community: React.FC = () => {
   const navigate = useNavigate();
+  const { details } = usePaymentDetails();
 
   const openWhatsApp = () => {
-    window.open(COMMUNITY.whatsapp, '_blank');
+    window.open(details.communityWhatsapp, '_blank');
   };
 
   const openTelegram = () => {
-    window.open(COMMUNITY.telegram, '_blank');
+    window.open(details.communityTelegram, '_blank');
   };
+
 
   return (
     <PageContainer>

@@ -1,25 +1,26 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/PageContainer';
-import { SUPPORT } from '@/lib/constants';
+import { usePaymentDetails } from '@/hooks/usePaymentDetails';
 import { ArrowLeft, MessageCircle, Send, Mail, Clock, Headphones, ExternalLink } from 'lucide-react';
 
 const Support: React.FC = () => {
   const navigate = useNavigate();
+  const { details } = usePaymentDetails();
 
   const openWhatsApp = () => {
-    // Remove + for wa.me link format
-    const cleanNumber = SUPPORT.whatsapp.replace('+', '');
+    const cleanNumber = details.supportWhatsapp.replace(/[^0-9]/g, '');
     window.open(`https://wa.me/${cleanNumber}`, '_blank');
   };
 
   const openTelegram = () => {
-    window.open(SUPPORT.telegram, '_blank');
+    window.open(details.supportTelegram, '_blank');
   };
 
   const openEmail = () => {
-    window.location.href = `mailto:${SUPPORT.email}`;
+    window.location.href = `mailto:${details.supportEmail}`;
   };
+
 
   return (
     <PageContainer>
@@ -71,7 +72,7 @@ const Support: React.FC = () => {
             </div>
             <div className="flex-1 text-left">
               <h4 className="font-medium text-foreground">WhatsApp</h4>
-              <p className="text-sm text-muted-foreground">{SUPPORT.whatsapp}</p>
+              <p className="text-sm text-muted-foreground">{details.supportWhatsapp}</p>
             </div>
             <ExternalLink className="w-5 h-5 text-muted-foreground" />
           </button>
@@ -99,7 +100,7 @@ const Support: React.FC = () => {
             </div>
             <div className="flex-1 text-left">
               <h4 className="font-medium text-foreground">Email</h4>
-              <p className="text-sm text-muted-foreground">{SUPPORT.email}</p>
+              <p className="text-sm text-muted-foreground">{details.supportEmail}</p>
             </div>
             <ExternalLink className="w-5 h-5 text-muted-foreground" />
           </button>
