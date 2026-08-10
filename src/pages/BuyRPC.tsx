@@ -355,52 +355,63 @@ const BuyRPC: React.FC = () => {
         )}
 
         {step === 'payment' && (
-          <div className="space-y-6 animate-fade-in">
-            {/* Payment Details */}
-            <div className="gradient-card rounded-2xl p-6 text-center">
-              <p className="text-sm text-muted-foreground mb-2">Amount to Pay</p>
-              <div className="text-3xl font-bold text-foreground mb-4">₦{price.toLocaleString()}</div>
+          <div className="space-y-5 animate-fade-in">
+            {/* Amount */}
+            <div className="relative rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/15 to-background p-5 flex items-start justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Amount to Pay</p>
+                <div className="text-3xl font-extrabold text-primary mt-1">₦{price.toLocaleString()}</div>
+              </div>
+              <button
+                onClick={() => copyToClipboard(String(price), 'Amount')}
+                className="p-3 rounded-xl bg-card border border-border hover:bg-muted transition-colors"
+              >
+                {copied === 'Amount' ? <CheckCircle size={18} className="text-success" /> : <Copy size={18} className="text-muted-foreground" />}
+              </button>
             </div>
 
-            <div className="bg-card rounded-xl p-4 space-y-4">
-              <h3 className="font-semibold text-foreground">Bank Transfer Details</h3>
-              
-              <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-muted-foreground">Bank Name</span>
-                  <span className="font-medium">{payDetails.bankName}</span>
+            {/* Account details */}
+            <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border">
+              <div className="p-4">
+                <p className="text-sm text-muted-foreground">Bank Name</p>
+                <p className="text-lg font-bold text-foreground mt-0.5">{payDetails.bankName}</p>
+              </div>
+              <div className="p-4 flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm text-muted-foreground">Account Number</p>
+                  <p className="text-lg font-bold text-foreground mt-0.5 tracking-wide">{payDetails.accountNumber}</p>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-muted-foreground">Account Number</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-medium">{payDetails.accountNumber}</span>
-                    <button onClick={() => copyToClipboard(payDetails.accountNumber, 'Account number')}>
-                      {copied === 'Account number' ? <CheckCircle size={14} className="text-success" /> : <Copy size={14} className="text-muted-foreground" />}
-                    </button>
-                  </div>
+                <button
+                  onClick={() => copyToClipboard(payDetails.accountNumber, 'Account number')}
+                  className="p-3 rounded-xl bg-background border border-border hover:bg-muted transition-colors shrink-0"
+                >
+                  {copied === 'Account number' ? <CheckCircle size={18} className="text-success" /> : <Copy size={18} className="text-muted-foreground" />}
+                </button>
+              </div>
+              <div className="p-4">
+                <p className="text-sm text-muted-foreground">Account Name</p>
+                <p className="text-lg font-bold text-foreground mt-0.5 uppercase">{payDetails.accountName}</p>
+              </div>
+              <div className="p-4 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm text-muted-foreground">Reference ID</p>
+                  <p className="text-lg font-bold text-foreground mt-0.5 truncate">{referenceId}</p>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-muted-foreground">Account Name</span>
-                  <span className="font-medium">{payDetails.accountName}</span>
-                </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-muted-foreground">Reference ID</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-primary">{referenceId}</span>
-                    <button onClick={() => copyToClipboard(referenceId, 'Reference ID')}>
-                      {copied === 'Reference ID' ? <CheckCircle size={14} className="text-success" /> : <Copy size={14} className="text-muted-foreground" />}
-                    </button>
-                  </div>
-                </div>
+                <button
+                  onClick={() => copyToClipboard(referenceId, 'Reference ID')}
+                  className="p-3 rounded-xl bg-background border border-border hover:bg-muted transition-colors shrink-0"
+                >
+                  {copied === 'Reference ID' ? <CheckCircle size={18} className="text-success" /> : <Copy size={18} className="text-muted-foreground" />}
+                </button>
               </div>
             </div>
 
             {/* Upload Screenshot */}
-            <div className="space-y-2">
-              <label className="text-sm text-muted-foreground block">Upload Payment Screenshot</label>
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary transition-colors bg-card">
-                <Upload className="w-8 h-8 text-muted-foreground mb-2" />
-                <span className="text-sm text-muted-foreground">
+            <div className="space-y-3">
+              <p className="text-base font-semibold text-foreground">Upload Payment Screenshot</p>
+              <label className="flex flex-col items-center justify-center w-full py-10 border-2 border-dashed border-primary/60 rounded-2xl cursor-pointer hover:border-primary transition-colors bg-card/40">
+                <Upload className="w-8 h-8 text-primary mb-3" />
+                <span className="text-base text-primary font-medium text-center px-4">
                   {screenshot ? screenshot.name : 'Click to upload payment proof'}
                 </span>
                 <span className="text-xs text-muted-foreground mt-1">PNG, JPG up to 10MB</span>
@@ -408,11 +419,17 @@ const BuyRPC: React.FC = () => {
               </label>
             </div>
 
-            <Button size="lg" className="w-full" onClick={handlePaymentMade} disabled={submitting}>
-              {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...</> : 'I Have Made Payment'}
+            <Button
+              size="lg"
+              className="w-full h-14 rounded-2xl text-base font-bold"
+              onClick={handlePaymentMade}
+              disabled={submitting}
+            >
+              {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...</> : 'I have made the transfer'}
             </Button>
           </div>
         )}
+
 
         {step === 'review' && depositStatus === 'pending' && (
           <div className="space-y-6 animate-scale-in text-center py-8">
