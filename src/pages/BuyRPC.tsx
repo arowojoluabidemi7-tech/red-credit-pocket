@@ -58,14 +58,15 @@ const BuyRPC: React.FC = () => {
     setStep('processing');
     setTimeout(() => {
       setStep('choose');
-    }, 2000);
+    }, 1000);
   };
 
   const handleChooseTier = (t: Tier) => {
     if (t === 'offline') {
-      window.open(SUPPORT.telegram, '_blank');
+      window.open(payDetails.supportTelegram, '_blank');
       return;
     }
+
     setTier(t);
     setStep('payment');
   };
@@ -315,14 +316,14 @@ const BuyRPC: React.FC = () => {
 
 
         {step === 'processing' && (
-          <div className="flex flex-col items-center justify-center py-20 space-y-6 animate-fade-in">
-            <Loader2 className="w-16 h-16 text-primary animate-spin" />
-            <div className="text-center space-y-2">
-              <h2 className="text-xl font-bold text-foreground">Processing...</h2>
-              <p className="text-muted-foreground">Please wait while we prepare your payment details</p>
+          <div className="flex items-center justify-center py-10 animate-fade-in">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border">
+              <Loader2 className="w-4 h-4 text-primary animate-spin" />
+              <span className="text-sm font-medium text-foreground">Verifying…</span>
             </div>
           </div>
         )}
+
 
         {step === 'choose' && (
           <div className="space-y-6 animate-fade-in">
