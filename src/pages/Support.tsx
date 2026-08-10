@@ -72,7 +72,7 @@ const Support: React.FC = () => {
             </div>
             <div className="flex-1 text-left">
               <h4 className="font-medium text-foreground">WhatsApp</h4>
-              <p className="text-sm text-muted-foreground">{SUPPORT.whatsapp}</p>
+              <p className="text-sm text-muted-foreground">{details.supportWhatsapp}</p>
             </div>
             <ExternalLink className="w-5 h-5 text-muted-foreground" />
           </button>
@@ -100,7 +100,7 @@ const Support: React.FC = () => {
             </div>
             <div className="flex-1 text-left">
               <h4 className="font-medium text-foreground">Email</h4>
-              <p className="text-sm text-muted-foreground">{SUPPORT.email}</p>
+              <p className="text-sm text-muted-foreground">{details.supportEmail}</p>
             </div>
             <ExternalLink className="w-5 h-5 text-muted-foreground" />
           </button>
