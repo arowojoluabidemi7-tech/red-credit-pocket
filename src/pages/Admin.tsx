@@ -318,7 +318,7 @@ const Admin: React.FC = () => {
     (async () => {
       const { data } = await db
         .from('site_settings')
-        .select('bank_name, account_number, account_name')
+        .select('*')
         .eq('id', 'payment')
         .maybeSingle();
       if (data) {
@@ -326,6 +326,11 @@ const Admin: React.FC = () => {
           bankName: data.bank_name || '',
           accountNumber: data.account_number || '',
           accountName: data.account_name || '',
+          supportWhatsapp: data.support_whatsapp || '',
+          supportTelegram: data.support_telegram || '',
+          supportEmail: data.support_email || '',
+          communityWhatsapp: data.community_whatsapp || '',
+          communityTelegram: data.community_telegram || '',
         });
       }
     })();
@@ -342,6 +347,11 @@ const Admin: React.FC = () => {
       bank_name: payForm.bankName,
       account_number: payForm.accountNumber,
       account_name: payForm.accountName,
+      support_whatsapp: payForm.supportWhatsapp,
+      support_telegram: payForm.supportTelegram,
+      support_email: payForm.supportEmail,
+      community_whatsapp: payForm.communityWhatsapp,
+      community_telegram: payForm.communityTelegram,
       updated_at: new Date().toISOString(),
     });
     setSavingPay(false);
@@ -349,8 +359,9 @@ const Admin: React.FC = () => {
       toast.error('Save failed: ' + error.message);
       return;
     }
-    toast.success('Account details updated');
+    toast.success('Settings updated');
   };
+
 
   const tabs: { id: Tab; label: string; icon: React.ElementType; badge?: number }[] = [
     { id: 'overview', label: 'Overview', icon: Activity },
