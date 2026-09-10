@@ -33,6 +33,8 @@ const Dashboard: React.FC = () => {
   const [canClaim, setCanClaim] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
   const [bannerIndex, setBannerIndex] = useState(1);
+  const [paymentPending, setPaymentPending] = useState(false);
+  const [checkingPayment, setCheckingPayment] = useState(true);
 
   const country = COUNTRIES.find(c => c.code === user?.country);
   const currency = country?.currency || '₦';
@@ -52,6 +54,26 @@ const Dashboard: React.FC = () => {
       }
     }
   }, [user, isAuthenticated, loading, navigate]);
+
+  useEffect(() => {
+    if (loading || !user || isAdmin) {
+      if (!loading) setCheckingPayment(false);
+      return;
+    }
+    let active = true;
+    (async () => {
+      const { data, error } = await db.from('deposits')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('status', 'pending')
+        .limit(1);
+      if (active) {
+        setPaymentPending(!error && Boolean(data?.length));
+        setCheckingPayment(false);
+      }
+    })();
+    return () => { active = false; };
+  }, [loading, user, isAdmin]);
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -104,7 +126,31 @@ const Dashboard: React.FC = () => {
     { icon: Headphones, label: 'Support', sub: 'Get help', path: '/support', color: 'bg-pink-500' },
   ];
 
-  if (!user) return null;
+  if (!user || checkingPayment) return null;
+
+  if (paymentPending) {
+    return (
+      <PageContainer showNav={false}>
+        <div className="min-h-screen flex items-center justify-center p-6">
+          <div className="w-full max-w-md rounded-3xl border border-border bg-card p-7 text-center space-y-5">
+            <div className="mx-auto w-16 h-16 rounded-full bg-yellow-500/15 flex items-center justify-center">
+              <Clock className="w-8 h-8 text-yellow-500" />
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-2xl font-bold text-foreground">Payment under review</h1>
+              <p className="text-muted-foreground">Your receipt must be approved or rejected before dashboard access is restored.</p>
+            </div>
+            <button onClick={() => navigate('/buy-rpc')} className="w-full rounded-2xl bg-primary py-3 font-semibold text-primary-foreground">
+              View payment status
+            </button>
+            <button onClick={async () => { await logout(); navigate('/'); }} className="w-full rounded-2xl border border-border py-3 font-semibold text-foreground">
+              Log out
+            </button>
+          </div>
+        </div>
+      </PageContainer>
+    );
+  }
 
   const shortId = user.id.replace(/-/g, '').slice(0, 10);
 

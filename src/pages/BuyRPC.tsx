@@ -18,7 +18,6 @@ import {
 
 type Step = 'notice' | 'form' | 'processing' | 'choose' | 'payment' | 'upload' | 'review';
 type Tier = 'online' | 'offline';
-const TIER_PRICES: Record<Tier, number> = { online: 6700, offline: 8700 };
 
 const BuyRPC: React.FC = () => {
   const { details: payDetails } = usePaymentDetails();
@@ -26,7 +25,7 @@ const BuyRPC: React.FC = () => {
   const { user, isAdmin } = useAuth();
   const [step, setStep] = useState<Step>('form');
   const [tier, setTier] = useState<Tier>('online');
-  const price = TIER_PRICES[tier];
+  const price = tier === 'online' ? payDetails.onlinePrice : payDetails.offlinePrice;
   const [showWhatsAppWarning, setShowWhatsAppWarning] = useState(false);
   const [formData, setFormData] = useState({
     fullName: user ? `${user.firstName} ${user.lastName}` : '',
@@ -61,6 +60,11 @@ const BuyRPC: React.FC = () => {
   };
 
   const handleChooseTier = (t: Tier) => {
+    const enabled = t === 'online' ? payDetails.onlineEnabled : payDetails.offlineEnabled;
+    if (!enabled) {
+      toast.info(`${t === 'online' ? 'Online' : 'Offline'} purchase is currently unavailable`);
+      return;
+    }
     if (t === 'offline') {
       window.open(payDetails.supportTelegram, '_blank');
       return;
@@ -338,21 +342,23 @@ const BuyRPC: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => handleChooseTier('online')}
-                className="gradient-card rounded-2xl p-6 text-center border-2 border-primary/40 hover:border-primary transition-all hover:scale-[1.02]"
+                disabled={!payDetails.onlineEnabled}
+                className="gradient-card rounded-2xl p-6 text-center border-2 border-primary/40 hover:border-primary transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Coins className="w-10 h-10 mx-auto mb-3 text-primary" />
                 <div className="text-lg font-bold text-foreground">Buy Online</div>
                 <div className="text-xs text-muted-foreground mb-3">Online</div>
-                <div className="text-2xl font-extrabold text-primary">₦6,700</div>
+                <div className="text-2xl font-extrabold text-primary">{payDetails.onlineEnabled ? `₦${payDetails.onlinePrice.toLocaleString()}` : 'Unavailable'}</div>
               </button>
               <button
                 onClick={() => handleChooseTier('offline')}
-                className="gradient-card rounded-2xl p-6 text-center border-2 border-border hover:border-primary transition-all hover:scale-[1.02]"
+                disabled={!payDetails.offlineEnabled}
+                className="gradient-card rounded-2xl p-6 text-center border-2 border-border hover:border-primary transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Coins className="w-10 h-10 mx-auto mb-3 text-foreground" />
                 <div className="text-lg font-bold text-foreground">Buy Offline</div>
                 <div className="text-xs text-muted-foreground mb-3">Offline</div>
-                <div className="text-2xl font-extrabold text-foreground">₦8,700</div>
+                <div className="text-2xl font-extrabold text-foreground">{payDetails.offlineEnabled ? `₦${payDetails.offlinePrice.toLocaleString()}` : 'Unavailable'}</div>
               </button>
             </div>
           </div>
@@ -495,14 +501,19 @@ const BuyRPC: React.FC = () => {
               </div>
               
               <button
-                onClick={() => window.open('https://v0-red-pay-activation-app-tr.vercel.app/', '_blank')}
+                   onClick={() => window.open(payDetails.activationLink, '_blank')}
                 className="mt-4 w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg hover:opacity-95 transition-opacity"
               >
                 <Lock className="w-5 h-5" />
                 TAP HERE TO ACTIVATE NOW
               </button>
               
-              <p className="text-xs text-red-500 text-center mt-3 flex items-center justify-center gap-1">
+               {payDetails.activationPrice > 0 && (
+                 <p className="text-sm text-red-500 text-center mt-3 font-semibold">
+                   Activation fee: ₦{payDetails.activationPrice.toLocaleString()}
+                 </p>
+               )}
+               <p className="text-xs text-red-500 text-center mt-3 flex items-center justify-center gap-1">
                 <Clock className="w-3 h-3" />
                 Activate immediately to start earning!
               </p>

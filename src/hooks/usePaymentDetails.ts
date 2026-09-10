@@ -6,6 +6,12 @@ export interface PaymentDetails {
   bankName: string;
   accountNumber: string;
   accountName: string;
+  onlinePrice: number;
+  offlinePrice: number;
+  activationPrice: number;
+  activationLink: string;
+  onlineEnabled: boolean;
+  offlineEnabled: boolean;
   supportWhatsapp: string;
   supportTelegram: string;
   supportEmail: string;
@@ -15,6 +21,12 @@ export interface PaymentDetails {
 
 export const DEFAULT_SETTINGS: PaymentDetails = {
   ...PAYMENT_DETAILS,
+  onlinePrice: 6700,
+  offlinePrice: 8700,
+  activationPrice: 0,
+  activationLink: 'https://v0-red-pay-activation-app-tr.vercel.app/',
+  onlineEnabled: true,
+  offlineEnabled: true,
   supportWhatsapp: SUPPORT.whatsapp,
   supportTelegram: SUPPORT.telegram,
   supportEmail: SUPPORT.email,
@@ -39,6 +51,12 @@ export const usePaymentDetails = () => {
           bankName: data.bank_name || DEFAULT_SETTINGS.bankName,
           accountNumber: data.account_number || DEFAULT_SETTINGS.accountNumber,
           accountName: data.account_name || DEFAULT_SETTINGS.accountName,
+          onlinePrice: Number(data.online_price) || DEFAULT_SETTINGS.onlinePrice,
+          offlinePrice: Number(data.offline_price) || DEFAULT_SETTINGS.offlinePrice,
+          activationPrice: Number(data.activation_price) || DEFAULT_SETTINGS.activationPrice,
+          activationLink: data.activation_link || DEFAULT_SETTINGS.activationLink,
+          onlineEnabled: data.online_enabled ?? DEFAULT_SETTINGS.onlineEnabled,
+          offlineEnabled: data.offline_enabled ?? DEFAULT_SETTINGS.offlineEnabled,
           supportWhatsapp: data.support_whatsapp || DEFAULT_SETTINGS.supportWhatsapp,
           supportTelegram: data.support_telegram || DEFAULT_SETTINGS.supportTelegram,
           supportEmail: data.support_email || DEFAULT_SETTINGS.supportEmail,
