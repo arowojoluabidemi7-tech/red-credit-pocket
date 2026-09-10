@@ -152,10 +152,16 @@ export type Database = {
         Row: {
           account_name: string
           account_number: string
+          activation_link: string
+          activation_price: number
           bank_name: string
           community_telegram: string
           community_whatsapp: string
           id: string
+          offline_enabled: boolean
+          offline_price: number
+          online_enabled: boolean
+          online_price: number
           support_email: string
           support_telegram: string
           support_whatsapp: string
@@ -164,10 +170,16 @@ export type Database = {
         Insert: {
           account_name?: string
           account_number?: string
+          activation_link?: string
+          activation_price?: number
           bank_name?: string
           community_telegram?: string
           community_whatsapp?: string
           id: string
+          offline_enabled?: boolean
+          offline_price?: number
+          online_enabled?: boolean
+          online_price?: number
           support_email?: string
           support_telegram?: string
           support_whatsapp?: string
@@ -176,10 +188,16 @@ export type Database = {
         Update: {
           account_name?: string
           account_number?: string
+          activation_link?: string
+          activation_price?: number
           bank_name?: string
           community_telegram?: string
           community_whatsapp?: string
           id?: string
+          offline_enabled?: boolean
+          offline_price?: number
+          online_enabled?: boolean
+          online_price?: number
           support_email?: string
           support_telegram?: string
           support_whatsapp?: string
