@@ -93,6 +93,8 @@ const Admin: React.FC = () => {
   const [search, setSearch] = useState('');
   const [payForm, setPayForm] = useState({
     bankName: '', accountNumber: '', accountName: '',
+    onlinePrice: '6700', offlinePrice: '8700', activationPrice: '0', activationLink: '',
+    onlineEnabled: true, offlineEnabled: true,
     supportWhatsapp: '', supportTelegram: '', supportEmail: '',
     communityWhatsapp: '', communityTelegram: '',
   });
@@ -326,6 +328,12 @@ const Admin: React.FC = () => {
           bankName: data.bank_name || '',
           accountNumber: data.account_number || '',
           accountName: data.account_name || '',
+          onlinePrice: String(data.online_price ?? 6700),
+          offlinePrice: String(data.offline_price ?? 8700),
+          activationPrice: String(data.activation_price ?? 0),
+          activationLink: data.activation_link || '',
+          onlineEnabled: data.online_enabled ?? true,
+          offlineEnabled: data.offline_enabled ?? true,
           supportWhatsapp: data.support_whatsapp || '',
           supportTelegram: data.support_telegram || '',
           supportEmail: data.support_email || '',
@@ -341,12 +349,29 @@ const Admin: React.FC = () => {
       toast.error('Fill in all account fields');
       return;
     }
+    const onlinePrice = Number(payForm.onlinePrice);
+    const offlinePrice = Number(payForm.offlinePrice);
+    const activationPrice = Number(payForm.activationPrice);
+    if (![onlinePrice, offlinePrice, activationPrice].every((value) => Number.isFinite(value) && value >= 0)) {
+      toast.error('Prices must be zero or greater');
+      return;
+    }
+    if (!payForm.activationLink.trim()) {
+      toast.error('Enter an activation link');
+      return;
+    }
     setSavingPay(true);
     const { error } = await db.from('site_settings').upsert({
       id: 'payment',
       bank_name: payForm.bankName,
       account_number: payForm.accountNumber,
       account_name: payForm.accountName,
+      online_price: onlinePrice,
+      offline_price: offlinePrice,
+      activation_price: activationPrice,
+      activation_link: payForm.activationLink.trim(),
+      online_enabled: payForm.onlineEnabled,
+      offline_enabled: payForm.offlineEnabled,
       support_whatsapp: payForm.supportWhatsapp,
       support_telegram: payForm.supportTelegram,
       support_email: payForm.supportEmail,
@@ -700,6 +725,41 @@ const Admin: React.FC = () => {
                     placeholder="e.g. MOSES GIFT"
                   />
                 </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
+              <div>
+                <h2 className="font-semibold text-foreground">Purchase Controls</h2>
+                <p className="text-sm text-muted-foreground">Change prices, activation details, or pause either purchase method.</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Online price (₦)</label>
+                  <Input type="number" min="0" value={payForm.onlinePrice} onChange={(e) => setPayForm({ ...payForm, onlinePrice: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">Offline price (₦)</label>
+                  <Input type="number" min="0" value={payForm.offlinePrice} onChange={(e) => setPayForm({ ...payForm, offlinePrice: e.target.value })} />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-sm text-muted-foreground mb-1 block">Activation price (₦)</label>
+                  <Input type="number" min="0" value={payForm.activationPrice} onChange={(e) => setPayForm({ ...payForm, activationPrice: e.target.value })} />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-sm text-muted-foreground mb-1 block">Activation link</label>
+                  <Input type="url" value={payForm.activationLink} onChange={(e) => setPayForm({ ...payForm, activationLink: e.target.value })} placeholder="https://..." />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button type="button" onClick={() => setPayForm({ ...payForm, onlineEnabled: !payForm.onlineEnabled })} className={`flex items-center justify-between rounded-xl border p-3 text-left ${payForm.onlineEnabled ? 'border-green-500/40 bg-green-500/10' : 'border-border bg-muted/30'}`}>
+                  <span><span className="block text-sm font-semibold text-foreground">Buy Online</span><span className="block text-xs text-muted-foreground">{payForm.onlineEnabled ? 'Available' : 'Deactivated'}</span></span>
+                  <span className={`w-10 h-6 rounded-full p-1 ${payForm.onlineEnabled ? 'bg-green-500' : 'bg-muted'}`}><span className={`block w-4 h-4 rounded-full bg-white transition-transform ${payForm.onlineEnabled ? 'translate-x-4' : ''}`} /></span>
+                </button>
+                <button type="button" onClick={() => setPayForm({ ...payForm, offlineEnabled: !payForm.offlineEnabled })} className={`flex items-center justify-between rounded-xl border p-3 text-left ${payForm.offlineEnabled ? 'border-green-500/40 bg-green-500/10' : 'border-border bg-muted/30'}`}>
+                  <span><span className="block text-sm font-semibold text-foreground">Buy Offline</span><span className="block text-xs text-muted-foreground">{payForm.offlineEnabled ? 'Available' : 'Deactivated'}</span></span>
+                  <span className={`w-10 h-6 rounded-full p-1 ${payForm.offlineEnabled ? 'bg-green-500' : 'bg-muted'}`}><span className={`block w-4 h-4 rounded-full bg-white transition-transform ${payForm.offlineEnabled ? 'translate-x-4' : ''}`} /></span>
+                </button>
               </div>
             </div>
 
