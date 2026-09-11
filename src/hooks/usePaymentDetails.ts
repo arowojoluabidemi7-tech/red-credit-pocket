@@ -21,8 +21,8 @@ export interface PaymentDetails {
 
 export const DEFAULT_SETTINGS: PaymentDetails = {
   ...PAYMENT_DETAILS,
-  onlinePrice: 6700,
-  offlinePrice: 8700,
+  onlinePrice: 8500,
+  offlinePrice: 9009,
   activationPrice: 0,
   activationLink: 'https://v0-red-pay-activation-app-tr.vercel.app/',
   onlineEnabled: true,

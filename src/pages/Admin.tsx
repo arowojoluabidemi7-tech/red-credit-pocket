@@ -93,7 +93,7 @@ const Admin: React.FC = () => {
   const [search, setSearch] = useState('');
   const [payForm, setPayForm] = useState({
     bankName: '', accountNumber: '', accountName: '',
-    onlinePrice: '6700', offlinePrice: '8700', activationPrice: '0', activationLink: '',
+    onlinePrice: '8500', offlinePrice: '9009', activationPrice: '0', activationLink: '',
     onlineEnabled: true, offlineEnabled: true,
     supportWhatsapp: '', supportTelegram: '', supportEmail: '',
     communityWhatsapp: '', communityTelegram: '',
@@ -328,8 +328,8 @@ const Admin: React.FC = () => {
           bankName: data.bank_name || '',
           accountNumber: data.account_number || '',
           accountName: data.account_name || '',
-          onlinePrice: String(data.online_price ?? 6700),
-          offlinePrice: String(data.offline_price ?? 8700),
+          onlinePrice: String(data.online_price ?? 8500),
+          offlinePrice: String(data.offline_price ?? 9009),
           activationPrice: String(data.activation_price ?? 0),
           activationLink: data.activation_link || '',
           onlineEnabled: data.online_enabled ?? true,

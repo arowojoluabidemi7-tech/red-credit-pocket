@@ -63,7 +63,7 @@ export const BANKS: Bank[] = [
 ];
 
 
-export const RPC_PRICE = 6700;
+export const RPC_PRICE = 8500;
 export const WELCOME_BONUS = 160000;
 export const CLAIM_AMOUNT = 30000;
 export const CLAIM_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
