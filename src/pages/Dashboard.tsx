@@ -34,7 +34,9 @@ const Dashboard: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [bannerIndex, setBannerIndex] = useState(1);
   const [paymentPending, setPaymentPending] = useState(false);
+  const [paymentCheckError, setPaymentCheckError] = useState(false);
   const [checkingPayment, setCheckingPayment] = useState(true);
+  const [paymentCheckVersion, setPaymentCheckVersion] = useState(0);
 
   const country = COUNTRIES.find(c => c.code === user?.country);
   const currency = country?.currency || '₦';
@@ -57,9 +59,14 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (loading || !user || isAdmin) {
-      if (!loading) setCheckingPayment(false);
+      if (!loading) {
+        setPaymentPending(false);
+        setPaymentCheckError(false);
+        setCheckingPayment(false);
+      }
       return;
     }
+    setCheckingPayment(true);
     let active = true;
     (async () => {
       const { data, error } = await db.from('deposits')
@@ -69,11 +76,12 @@ const Dashboard: React.FC = () => {
         .limit(1);
       if (active) {
         setPaymentPending(!error && Boolean(data?.length));
+        setPaymentCheckError(Boolean(error));
         setCheckingPayment(false);
       }
     })();
     return () => { active = false; };
-  }, [loading, user, isAdmin]);
+  }, [loading, user, isAdmin, paymentCheckVersion]);
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -128,20 +136,29 @@ const Dashboard: React.FC = () => {
 
   if (!user || checkingPayment) return null;
 
-  if (paymentPending) {
+   if (paymentPending || paymentCheckError) {
     return (
       <PageContainer showNav={false}>
         <div className="min-h-screen flex items-center justify-center p-6">
           <div className="w-full max-w-md rounded-3xl border border-border bg-card p-7 text-center space-y-5">
-            <div className="mx-auto w-16 h-16 rounded-full bg-yellow-500/15 flex items-center justify-center">
-              <Clock className="w-8 h-8 text-yellow-500" />
+             <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center ${paymentCheckError ? 'bg-destructive/15' : 'bg-yellow-500/15'}`}>
+               <Clock className={`w-8 h-8 ${paymentCheckError ? 'text-destructive' : 'text-yellow-500'}`} />
             </div>
             <div className="space-y-2">
-              <h1 className="text-2xl font-bold text-foreground">Payment under review</h1>
-              <p className="text-muted-foreground">Your receipt must be approved or rejected before dashboard access is restored.</p>
+               <h1 className="text-2xl font-bold text-foreground">
+                 {paymentCheckError ? 'Unable to verify payment' : 'Payment under review'}
+               </h1>
+               <p className="text-muted-foreground">
+                 {paymentCheckError
+                   ? 'Dashboard access is paused until your payment status can be verified.'
+                   : 'Your receipt must be approved or rejected before dashboard access is restored.'}
+               </p>
             </div>
-            <button onClick={() => navigate('/buy-rpc')} className="w-full rounded-2xl bg-primary py-3 font-semibold text-primary-foreground">
-              View payment status
+             <button
+               onClick={() => paymentCheckError ? setPaymentCheckVersion((version) => version + 1) : navigate('/buy-rpc')}
+               className="w-full rounded-2xl bg-primary py-3 font-semibold text-primary-foreground"
+             >
+               {paymentCheckError ? 'Try again' : 'View payment status'}
             </button>
             <button onClick={async () => { await logout(); navigate('/'); }} className="w-full rounded-2xl border border-border py-3 font-semibold text-foreground">
               Log out

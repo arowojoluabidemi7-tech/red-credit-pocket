@@ -34,7 +34,7 @@ const BuyRPC: React.FC = () => {
   });
   const [copied, setCopied] = useState<string | null>(null);
   const [screenshot, setScreenshot] = useState<File | null>(null);
-  const [referenceId] = useState(`REF${generateId()}`);
+  const [referenceId, setReferenceId] = useState(`REF${generateId()}`);
   const [rpcCode] = useState(isAdmin ? 'RPC6098' : 'RPC6097');
   const [depositId, setDepositId] = useState<string | null>(null);
   const [depositStatus, setDepositStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
@@ -143,6 +143,29 @@ const BuyRPC: React.FC = () => {
     const iv = setInterval(check, 5000);
     return () => { alive = false; clearInterval(iv); };
   }, [step, depositId]);
+
+  // Restore a pending submission when the user returns or reloads this page.
+  useEffect(() => {
+    if (!user?.id || isAdmin) return;
+    let active = true;
+    (async () => {
+      const { data } = await db.from('deposits')
+        .select('id, status, admin_note, reference')
+        .eq('user_id', user.id)
+        .eq('status', 'pending')
+        .eq('note', 'RPC Purchase')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!active || !data) return;
+      setDepositId(data.id);
+      setDepositStatus(data.status);
+      setAdminNote(data.admin_note);
+      setReferenceId(data.reference);
+      setStep('review');
+    })();
+    return () => { active = false; };
+  }, [user?.id, isAdmin]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
