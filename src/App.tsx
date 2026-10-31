@@ -16,7 +16,6 @@ import Community from "./pages/Community";
 import Support from "./pages/Support";
 import History from "./pages/History";
 import Withdraw from "./pages/Withdraw";
-import Admin from "./pages/Admin";
 import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
 
@@ -43,7 +42,6 @@ const App = () => (
             <Route path="/support" element={<Support />} />
             <Route path="/history" element={<History />} />
             <Route path="/withdraw" element={<Withdraw />} />
-            <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
