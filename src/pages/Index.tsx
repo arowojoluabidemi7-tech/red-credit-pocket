@@ -5,13 +5,12 @@ import GetStarted from './GetStarted';
 
 const Index: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, isAdmin, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
     if (loading) return;
-    if (isAdmin) navigate('/admin');
-    else if (isAuthenticated) navigate('/dashboard');
-  }, [isAuthenticated, isAdmin, loading, navigate]);
+    if (isAuthenticated) navigate('/dashboard');
+  }, [isAuthenticated, loading, navigate]);
 
   return <GetStarted />;
 };

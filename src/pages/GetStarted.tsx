@@ -43,28 +43,33 @@ const GetStarted: React.FC = () => {
       return;
     }
 
-    const { storage } = await import('@/lib/store');
-    if (storage.checkEmailExists(signUpData.email)) {
-      toast.error(
-        <div className="space-y-1">
-          <p>This email is already registered.</p>
-          <p className="text-sm">
-            <a href="/forgot-password" className="text-primary underline">Click here to reset your password</a>
-          </p>
-        </div>,
-        { duration: 5000 }
-      );
+    setIsProcessing(true);
+
+    const { error, user } = await signup(signUpData);
+    setIsProcessing(false);
+
+    if (error) {
+      if (error.toLowerCase().includes('registered') || error.toLowerCase().includes('exists')) {
+        toast.error(
+          <div className="space-y-1">
+            <p>This email is already registered.</p>
+            <p className="text-sm">
+              <a href="/forgot-password" className="text-primary underline">Click here to reset your password</a>
+            </p>
+          </div>,
+          { duration: 5000 }
+        );
+      } else {
+        toast.error(error);
+      }
       return;
     }
 
-    setIsProcessing(true);
-
-    const user = signup(signUpData);
     toast.success('Account created successfully!');
     navigate('/welcome', { state: { user } });
   };
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!signInData.email || !signInData.password) {
@@ -72,17 +77,17 @@ const GetStarted: React.FC = () => {
       return;
     }
 
-    const success = login(signInData.email, signInData.password);
-    if (success) {
-      toast.success('Welcome back!');
-      if (signInData.email === 'admin@redpay.com') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
-    } else {
-      toast.error('Invalid email or password');
+    setIsProcessing(true);
+    const { error } = await login(signInData.email, signInData.password);
+    setIsProcessing(false);
+
+    if (error) {
+      toast.error(error);
+      return;
     }
+
+    toast.success('Welcome back!');
+    navigate('/dashboard');
   };
 
   return (
