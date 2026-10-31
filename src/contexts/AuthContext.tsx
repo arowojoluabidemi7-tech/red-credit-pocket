@@ -34,7 +34,6 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   isAuthenticated: boolean;
-  isAdmin: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
@@ -68,7 +67,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const hydrate = async (uid: string) => {
@@ -82,8 +80,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(merged);
       storage.setUser(merged);
     }
-    const { data: roles } = await db.from('user_roles').select('role').eq('user_id', uid);
-    setIsAdmin(!!roles?.some((r: { role: string }) => r.role === 'admin'));
   };
 
   useEffect(() => {
@@ -94,7 +90,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       } else {
         setUser(null);
         setProfile(null);
-        setIsAdmin(false);
       }
     });
     supabase.auth.getSession().then(({ data: { session: s } }) => {
@@ -161,7 +156,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         user,
         profile,
         isAuthenticated: !!session,
-        isAdmin,
         loading,
         login,
         logout,
