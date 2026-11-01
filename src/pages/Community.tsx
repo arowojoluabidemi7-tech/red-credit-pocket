@@ -1,4 +1,5 @@
 import React from 'react';
+import { SITE, RPC_CODES, WITHDRAWAL } from '@/config';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/PageContainer';
 import { Button } from '@/components/ui/button';
@@ -38,7 +39,7 @@ const Community: React.FC = () => {
         {/* Community Card */}
         <div className="gradient-card rounded-2xl p-6 text-center animate-fade-in">
           <Users className="w-16 h-16 mx-auto mb-4 text-primary" />
-          <h2 className="text-xl font-bold text-foreground mb-2">Join the RedPay Family</h2>
+          <h2 className="text-xl font-bold text-foreground mb-2">{SITE.communityHeading}</h2>
           <p className="text-muted-foreground">
             Connect with other users, get updates, and learn tips to maximize your earnings
           </p>

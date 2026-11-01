@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { SITE, RPC_CODES, WITHDRAWAL } from '@/config';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/PageContainer';
 import { Button } from '@/components/ui/button';
@@ -36,7 +37,7 @@ const BuyRPC: React.FC = () => {
   const [copied, setCopied] = useState<string | null>(null);
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [referenceId, setReferenceId] = useState(`REF${generateId()}`);
-  const [rpcCode] = useState('RPC6097');
+  const [rpcCode] = useState(RPC_CODES.confirmedCode);
   const [depositId, setDepositId] = useState<string | null>(null);
   const [depositStatus, setDepositStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
   const [adminNote, setAdminNote] = useState<string | null>(null);
@@ -201,7 +202,7 @@ const BuyRPC: React.FC = () => {
             <p className="text-sm text-muted-foreground">
               {step === 'review' && depositStatus === 'approved'
                 ? 'Your RPC code is active and ready to use!'
-                : step === 'payment' ? 'Transfer to the account below' : 'RedPay Credits'}
+                : step === 'payment' ? 'Transfer to the account below' : `${SITE.name} Credits`}
             </p>
           </div>
 
@@ -215,7 +216,7 @@ const BuyRPC: React.FC = () => {
               <div className="absolute -bottom-20 -left-10 w-40 h-40 rounded-full bg-yellow-300/10 blur-2xl" />
               <div className="relative">
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 text-white text-[11px] font-semibold mb-3">
-                  <Sparkles size={12} /> RedPay Credit
+                  <Sparkles size={12} /> {SITE.creditName}
                 </div>
                 <p className="text-white/80 text-sm">Amount to Pay</p>
                 <div className="flex items-baseline gap-2 mt-1">
@@ -492,7 +493,7 @@ const BuyRPC: React.FC = () => {
               
                {payDetails.activationPrice > 0 && (
                  <p className="text-sm text-red-500 text-center mt-3 font-semibold">
-                   Activation fee: ₦{payDetails.activationPrice.toLocaleString()}
+                   Activation fee: {SITE.defaultCurrency}{payDetails.activationPrice.toLocaleString()}
                  </p>
                )}
                <p className="text-xs text-red-500 text-center mt-3 flex items-center justify-center gap-1">

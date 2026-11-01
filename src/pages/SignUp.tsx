@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SITE, RPC_CODES, WITHDRAWAL } from '@/config';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -74,7 +75,7 @@ const SignUp: React.FC = () => {
         {/* Title */}
         <div className="space-y-2 animate-fade-in">
           <h1 className="text-2xl font-bold text-foreground">Create Account</h1>
-          <p className="text-muted-foreground">Join RedPay and start earning today</p>
+          <p className="text-muted-foreground">{SITE.signUpTagline}</p>
         </div>
 
         {/* Form */}

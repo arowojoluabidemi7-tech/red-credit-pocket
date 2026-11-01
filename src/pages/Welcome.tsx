@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SITE, RPC_CODES, WITHDRAWAL } from '@/config';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Logo } from '@/components/Logo';
 import { Gift, PartyPopper } from 'lucide-react';
@@ -11,7 +12,7 @@ const Welcome: React.FC = () => {
   const [displayBalance, setDisplayBalance] = useState(0);
 
   const country = COUNTRIES.find(c => c.code === user?.country);
-  const currency = country?.currency || '₦';
+  const currency = country?.currency || SITE.defaultCurrency;
 
   const formatCurrency = (amount: number) => {
     return `${currency}${amount.toLocaleString()}`;

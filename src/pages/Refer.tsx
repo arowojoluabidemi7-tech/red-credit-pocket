@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SITE, RPC_CODES, WITHDRAWAL } from '@/config';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/PageContainer';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,7 @@ const Refer: React.FC = () => {
   const [referralHistory, setReferralHistory] = useState<Transaction[]>([]);
 
   const country = COUNTRIES.find(c => c.code === user?.country);
-  const currency = country?.currency || '₦';
+  const currency = country?.currency || SITE.defaultCurrency;
 
   useEffect(() => {
     if (user) {
@@ -37,8 +38,8 @@ const Refer: React.FC = () => {
   const shareCode = () => {
     if (user && navigator.share) {
       navigator.share({
-        title: 'Join RedPay',
-        text: `Join RedPay and earn rewards! Use my referral code: ${user.referralCode}`,
+        title: `Join ${SITE.name}`,
+        text: `${SITE.referralShareText} ${user.referralCode}`,
         url: window.location.origin,
       });
     } else {
