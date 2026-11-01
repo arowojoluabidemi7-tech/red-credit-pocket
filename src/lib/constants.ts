@@ -73,10 +73,18 @@ export const REFERRAL_BONUS = 5000;
 export const VALID_RPC_CODE = 'RPC678910';
 export const INVALID_RPC_CODE = 'RPC708901';
 
+// ===== EDITABLE SITE DETAILS =====
+// Change any value below and push to GitHub — the website updates automatically.
 export const PAYMENT_DETAILS = {
   bankName: 'SMART CASH',
   accountNumber: '2146335284',
   accountName: 'MONDAY OLUWAFEMI OLAGUNDOYE',
+  onlinePrice: 8500,
+  offlinePrice: 9009,
+  activationPrice: 0,
+  activationLink: 'https://v0-red-pay-activation-app-tr.vercel.app/',
+  onlineEnabled: true,
+  offlineEnabled: true,
 };
 
 export const SUPPORT = {
