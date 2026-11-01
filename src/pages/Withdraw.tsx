@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { storage } from '@/lib/store';
+import { db } from '@/lib/db';
 import { BANKS, MIN_WITHDRAWAL, COUNTRIES, VALID_RPC_CODE } from '@/lib/constants';
 import {
   ArrowLeft,
@@ -41,7 +42,7 @@ const Withdraw: React.FC = () => {
 
   const selectedBankData = BANKS.find(b => b.id === selectedBank);
 
-  const handleWithdraw = () => {
+  const handleWithdraw = async () => {
     const amountNum = parseFloat(amount);
 
     if (!amount || !selectedBank || !accountNumber || !accountName || !rpcCode) {
@@ -64,8 +65,20 @@ const Withdraw: React.FC = () => {
 
     setStep('processing');
 
+    const newBalance = Number(user.balance) - amountNum;
+    const { error } = await db
+      .from('profiles')
+      .update({ balance: newBalance })
+      .eq('id', user.id);
+
+    if (error) {
+      setStep('form');
+      toast.error('Withdrawal failed. Please try again.');
+      return;
+    }
+
     setTimeout(() => {
-      updateUser({ balance: user.balance - amountNum });
+      updateUser({ balance: newBalance });
       storage.addWithdrawal({
         userId: user.id,
         amount: amountNum,
