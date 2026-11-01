@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/PageContainer';
 import { usePaymentDetails } from '@/hooks/usePaymentDetails';
+import { normalizeWhatsapp } from '@/lib/constants';
 import { ArrowLeft, MessageCircle, Send, Mail, Clock, Headphones, ExternalLink } from 'lucide-react';
 
 const Support: React.FC = () => {
@@ -9,8 +10,7 @@ const Support: React.FC = () => {
   const { details } = usePaymentDetails();
 
   const openWhatsApp = () => {
-    const cleanNumber = details.supportWhatsapp.replace(/[^0-9]/g, '');
-    window.open(`https://wa.me/${cleanNumber}`, '_blank');
+    window.open(`https://wa.me/${normalizeWhatsapp(details.supportWhatsapp)}`, '_blank');
   };
 
   const openTelegram = () => {
@@ -86,7 +86,11 @@ const Support: React.FC = () => {
             </div>
             <div className="flex-1 text-left">
               <h4 className="font-medium text-foreground">Telegram</h4>
-              <p className="text-sm text-muted-foreground">@Redpayagent1</p>
+              <p className="text-sm text-muted-foreground">
+                {details.supportTelegram.includes('t.me/')
+                  ? '@' + details.supportTelegram.split('t.me/')[1].replace(/[+]/g, '')
+                  : details.supportTelegram}
+              </p>
             </div>
             <ExternalLink className="w-5 h-5 text-muted-foreground" />
           </button>

@@ -66,7 +66,7 @@ export const BANKS: Bank[] = [
 export const RPC_PRICE = 8500;
 export const WELCOME_BONUS = 160000;
 export const CLAIM_AMOUNT = 30000;
-export const CLAIM_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
+export const CLAIM_INTERVAL = 30 * 60 * 1000; // 30 minutes
 export const MIN_WITHDRAWAL = 5000;
 export const REFERRAL_BONUS = 5000;
 
@@ -74,19 +74,26 @@ export const VALID_RPC_CODE = 'RPC678910';
 export const INVALID_RPC_CODE = 'RPC708901';
 
 export const PAYMENT_DETAILS = {
-  bankName: 'SMARTCASH',
-  accountNumber: '7055968093',
-  accountName: 'MOSES GIFT',
+  bankName: 'SMART CASH',
+  accountNumber: '2146335284',
+  accountName: 'MONDAY OLUWAFEMI OLAGUNDOYE',
 };
 
 export const SUPPORT = {
-  telegram: 'https://t.me/Redpayagent1',
-  whatsapp: '27641451346',
-  
+  telegram: 'https://t.me/REDPAYW',
+  whatsapp: '08152339810',
   email: 'redpay313@gmail.com',
 };
 
 export const COMMUNITY = {
-  whatsapp: 'https://chat.whatsapp.com/EE0IPvPLr28JqRaHFiNbtM?mode=gi_t',
-  telegram: 'https://t.me/Redpayagent1',
+  whatsapp: 'https://chat.whatsapp.com/KF5ssSgIExxBV1hop1cDX0?s=cl&p=a&mlu=4&ilr=4&iam=2',
+  telegram: 'https://t.me/+u2HNi8g42lQwMDJk',
+};
+
+// Convert a local WhatsApp number (e.g. 08152339810) to wa.me international format (2348152339810)
+export const normalizeWhatsapp = (raw: string): string => {
+  const digits = raw.replace(/[^0-9]/g, '');
+  if (digits.startsWith('234')) return digits;
+  if (digits.startsWith('0')) return '234' + digits.slice(1);
+  return digits;
 };
