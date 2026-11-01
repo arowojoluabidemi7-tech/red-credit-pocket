@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { startReceiptReview } from './paymentReview';
+import { startReceiptReview } from '../src/lib/paymentReview';
 
 describe('receipt review', () => {
   test('keeps a receipt under review for 5 seconds before completing', () => {
