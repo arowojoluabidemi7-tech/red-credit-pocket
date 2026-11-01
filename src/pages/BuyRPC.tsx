@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePaymentDetails } from '@/hooks/usePaymentDetails';
 import { storage, generateId } from '@/lib/store';
 import { db } from '@/lib/db';
+import { normalizeWhatsapp } from '@/lib/constants';
 import { ArrowLeft, Coins, Copy, CheckCircle, Upload, AlertTriangle, X, Clock, MessageCircle, Loader2, Lock, User as UserIcon, Mail, Phone, ShieldCheck, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -599,7 +600,7 @@ const BuyRPC: React.FC = () => {
                 className="w-full"
                 onClick={() => {
                   setShowWhatsAppWarning(false);
-                  window.open(`https://wa.me/${payDetails.supportWhatsapp.replace(/[^0-9]/g, '')}?text=Hello, I just made an RPC payment. Reference ID: ${referenceId}`, '_blank');
+                  window.open(`https://wa.me/${normalizeWhatsapp(payDetails.supportWhatsapp)}?text=Hello, I just made an RPC payment. Reference ID: ${referenceId}`, '_blank');
                 }}
               >
                 <MessageCircle className="w-5 h-5 mr-2" />
