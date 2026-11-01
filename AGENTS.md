@@ -1,1 +1,2 @@
 - Config files in src/config are the single source for all site details (editable on GitHub); constants.ts only re-maps them.
+- Receipt review timing is configured in src/config/payment.ts and scheduled through src/lib/paymentReview.ts; timed display outcomes must not modify actual payment verification records.

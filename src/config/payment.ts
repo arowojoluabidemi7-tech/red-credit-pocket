@@ -9,6 +9,9 @@ export const PAYMENT_ACCOUNT = {
 // Link opened when users tap "Tap here to activate your account"
 export const ACTIVATION_LINK = 'https://v0-red-pay-activation-app-tr.vercel.app/';
 
+// How long each successfully submitted receipt displays "Payment is under review".
+export const RECEIPT_REVIEW_DURATION_MS = 5_000;
+
 // RPC codes
 export const RPC_CODES = {
   confirmedCode: 'RPC6097',   // Code displayed to users after "Payment Confirmed"
