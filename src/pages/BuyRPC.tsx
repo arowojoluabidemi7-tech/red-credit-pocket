@@ -23,7 +23,7 @@ type Tier = 'online' | 'offline';
 const BuyRPC: React.FC = () => {
   const { details: payDetails } = usePaymentDetails();
   const navigate = useNavigate();
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const [step, setStep] = useState<Step>('form');
   const [tier, setTier] = useState<Tier>('online');
   const price = tier === 'online' ? payDetails.onlinePrice : payDetails.offlinePrice;
@@ -36,7 +36,7 @@ const BuyRPC: React.FC = () => {
   const [copied, setCopied] = useState<string | null>(null);
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [referenceId, setReferenceId] = useState(`REF${generateId()}`);
-  const [rpcCode] = useState(isAdmin ? 'RPC6098' : 'RPC6097');
+  const [rpcCode] = useState('RPC6097');
   const [depositId, setDepositId] = useState<string | null>(null);
   const [depositStatus, setDepositStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
   const [adminNote, setAdminNote] = useState<string | null>(null);
@@ -147,7 +147,7 @@ const BuyRPC: React.FC = () => {
 
   // Restore a pending submission when the user returns or reloads this page.
   useEffect(() => {
-    if (!user?.id || isAdmin) return;
+    if (!user?.id) return;
     let active = true;
     (async () => {
       const { data } = await db.from('deposits')
@@ -166,7 +166,7 @@ const BuyRPC: React.FC = () => {
       setStep('review');
     })();
     return () => { active = false; };
-  }, [user?.id, isAdmin]);
+  }, [user?.id]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -179,48 +179,6 @@ const BuyRPC: React.FC = () => {
   if (!user) {
     navigate('/');
     return null;
-  }
-
-  if (isAdmin) {
-    return (
-      <PageContainer>
-        <div className="p-4 space-y-6">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/admin')}
-              className="p-2 rounded-lg bg-card hover:bg-muted transition-colors"
-            >
-              <ArrowLeft size={20} />
-            </button>
-            <div>
-              <h1 className="text-xl font-bold">Buy RPC</h1>
-              <p className="text-sm text-muted-foreground">Admin</p>
-            </div>
-          </div>
-
-          <div className="space-y-6 animate-scale-in text-center py-8">
-            <div className="w-20 h-20 mx-auto rounded-full bg-green-500/20 flex items-center justify-center">
-              <CheckCircle className="w-10 h-10 text-green-500" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-green-500">Payment Confirmed</h2>
-              <p className="text-muted-foreground">Your RPC is</p>
-            </div>
-            <div className="glass-card rounded-xl p-6 space-y-3">
-              <div className="flex items-center justify-center gap-2">
-                <div className="text-3xl font-mono font-bold text-primary">RPC6098</div>
-                <button onClick={() => copyToClipboard('RPC6098', 'RPC code')}>
-                  {copied === 'RPC code' ? <CheckCircle size={18} className="text-success" /> : <Copy size={18} className="text-muted-foreground" />}
-                </button>
-              </div>
-            </div>
-            <Button size="lg" className="w-full" onClick={() => navigate('/admin')}>
-              Back to Admin Panel
-            </Button>
-          </div>
-        </div>
-      </PageContainer>
-    );
   }
 
   return (
