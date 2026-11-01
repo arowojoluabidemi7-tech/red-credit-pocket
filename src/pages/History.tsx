@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SITE, RPC_CODES, WITHDRAWAL } from '@/config';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/PageContainer';
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,7 +47,7 @@ const History: React.FC = () => {
   const [filter, setFilter] = useState<string>('all');
 
   const country = COUNTRIES.find(c => c.code === user?.country);
-  const currency = country?.currency || '₦';
+  const currency = country?.currency || SITE.defaultCurrency;
 
   useEffect(() => {
     if (user) {

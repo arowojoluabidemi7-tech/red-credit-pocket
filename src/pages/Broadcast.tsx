@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SITE, RPC_CODES, WITHDRAWAL } from '@/config';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/PageContainer';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,7 @@ const Broadcast: React.FC = () => {
   const [rpcCode, setRpcCode] = useState('');
 
   const country = COUNTRIES.find(c => c.code === user?.country);
-  const currency = country?.currency || '₦';
+  const currency = country?.currency || SITE.defaultCurrency;
 
   const handlePurchase = () => {
     if (!phone || !amount || !rpcCode) {

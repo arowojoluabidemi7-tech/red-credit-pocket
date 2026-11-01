@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SITE, RPC_CODES, WITHDRAWAL } from '@/config';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/PageContainer';
 import { Button } from '@/components/ui/button';
@@ -38,7 +39,7 @@ const Withdraw: React.FC = () => {
   const [showBankSelect, setShowBankSelect] = useState(false);
 
   const country = COUNTRIES.find(c => c.code === user?.country);
-  const currency = country?.currency || '₦';
+  const currency = country?.currency || SITE.defaultCurrency;
 
   const selectedBankData = BANKS.find(b => b.id === selectedBank);
 
@@ -104,7 +105,7 @@ const Withdraw: React.FC = () => {
     return null;
   }
 
-  const quickAmounts = [5000, 10000, 25000, 50000];
+  const quickAmounts = WITHDRAWAL.quickAmounts;
 
   return (
     <PageContainer showNav={false}>

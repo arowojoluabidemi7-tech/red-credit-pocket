@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SITE, RPC_CODES, WITHDRAWAL } from '@/config';
 import { Link, useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/PageContainer';
 import { Logo } from '@/components/Logo';
@@ -36,7 +37,7 @@ const Dashboard: React.FC = () => {
 
 
   const country = COUNTRIES.find(c => c.code === user?.country);
-  const currency = country?.currency || '₦';
+  const currency = country?.currency || SITE.defaultCurrency;
 
   useEffect(() => {
     if (loading) return;
@@ -188,7 +189,7 @@ const Dashboard: React.FC = () => {
                 {formatCurrency(user.balance)}
               </div>
               <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/15 text-white text-xs">
-                <TrendingUp size={12} /> +₦30k
+                <TrendingUp size={12} /> +{currency}{(CLAIM_AMOUNT / 1000).toFixed(0)}k
               </div>
               <div className="text-white/70 text-xs mt-2">ID: {shortId}</div>
             </div>
@@ -230,7 +231,7 @@ const Dashboard: React.FC = () => {
             <div className="relative p-4 h-full flex flex-col justify-center max-w-[65%]">
               <p className="text-white text-xl font-extrabold leading-tight">
                 Start earning with<br />
-                <span className="text-primary">RedPay</span> today!
+                <span className="text-primary">{SITE.name}</span> today!
               </p>
               <p className="text-white text-sm font-semibold mt-2 leading-tight">
                 Turn your phone into<br />your money machine.
@@ -287,7 +288,7 @@ const Dashboard: React.FC = () => {
             <div className="relative p-4 h-full flex flex-col justify-center max-w-[65%]">
               <p className="text-white text-xl font-extrabold leading-tight">
                 Start earning with<br />
-                <span className="text-primary">RedPay</span> today!
+                <span className="text-primary">{SITE.name}</span> today!
               </p>
               <p className="text-white text-sm font-semibold mt-2 leading-tight">
                 Turn your phone into<br />your money machine.

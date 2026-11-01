@@ -1,0 +1,1 @@
+- Config files in src/config are the single source for all site details (editable on GitHub); constants.ts only re-maps them.
