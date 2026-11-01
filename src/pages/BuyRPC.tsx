@@ -9,6 +9,7 @@ import { usePaymentDetails } from '@/hooks/usePaymentDetails';
 import { storage, generateId } from '@/lib/store';
 import { db } from '@/lib/db';
 import { normalizeWhatsapp } from '@/lib/constants';
+import { startReceiptReview } from '@/lib/paymentReview';
 import { ArrowLeft, Coins, Copy, CheckCircle, Upload, AlertTriangle, X, Clock, MessageCircle, Loader2, Lock, User as UserIcon, Mail, Phone, ShieldCheck, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -24,7 +25,7 @@ type Tier = 'online' | 'offline';
 const BuyRPC: React.FC = () => {
   const { details: payDetails } = usePaymentDetails();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [step, setStep] = useState<Step>('form');
   const [tier, setTier] = useState<Tier>('online');
   const price = tier === 'online' ? payDetails.onlinePrice : payDetails.offlinePrice;
@@ -39,7 +40,7 @@ const BuyRPC: React.FC = () => {
   const [referenceId, setReferenceId] = useState(`REF${generateId()}`);
   const [rpcCode] = useState(RPC_CODES.confirmedCode);
   const [depositId, setDepositId] = useState<string | null>(null);
-  const [depositStatus, setDepositStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
+  const [depositStatus, setDepositStatus] = useState<'pending' | 'approved' | 'rejected' | 'not_received'>('pending');
   const [adminNote, setAdminNote] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -77,6 +78,7 @@ const BuyRPC: React.FC = () => {
   };
 
   const handlePaymentMade = async () => {
+    if (submitting) return;
     if (!screenshot) {
       toast.error('Please upload payment screenshot');
       return;
@@ -98,16 +100,7 @@ const BuyRPC: React.FC = () => {
     }
     screenshotUrl = path;
 
-    // Local records
-    storage.addRpcPayment({
-      userId: user.id, amount: price, reference: referenceId, status: 'pending', rpcCode,
-    });
-    storage.addTransaction({
-      userId: user.id, type: 'rpc_purchase', amount: price, status: 'pending',
-      description: 'RPC Purchase', reference: referenceId,
-    });
-
-    // Admin queue
+    // Save the receipt; the timed screen is not a bank verification result.
     const { data, error } = await db.from('deposits').insert({
       user_id: user.id,
       user_email: user.email,
@@ -125,49 +118,37 @@ const BuyRPC: React.FC = () => {
       toast.error('Submit failed: ' + error.message);
       return;
     }
+    storage.addRpcPayment({
+      userId: user.id, amount: price, reference: referenceId, status: 'pending', rpcCode,
+    });
+    storage.addTransaction({
+      userId: user.id, type: 'rpc_purchase', amount: price, status: 'pending',
+      description: 'RPC Purchase', reference: referenceId,
+    });
     setDepositId(data.id);
     setDepositStatus('pending');
     setStep('review');
   };
 
-  // Poll deposit status while under review
+  // Every new submission gets its own five-second display period.
   useEffect(() => {
-    if (step !== 'review' || !depositId) return;
-    let alive = true;
-    const check = async () => {
-      const { data } = await db.from('deposits')
-        .select('status, admin_note').eq('id', depositId).single();
-      if (!alive || !data) return;
-      setDepositStatus(data.status);
-      setAdminNote(data.admin_note);
-    };
-    check();
-    const iv = setInterval(check, 5000);
-    return () => { alive = false; clearInterval(iv); };
-  }, [step, depositId]);
+    if (step !== 'review' || !depositId || depositStatus !== 'pending') return;
+    const timer = startReceiptReview(() => setDepositStatus('not_received'));
+    return () => clearTimeout(timer);
+  }, [step, depositId, depositStatus]);
 
-  // Restore a pending submission when the user returns or reloads this page.
+  const resetPayment = () => {
+    setScreenshot(null);
+    setReferenceId(`REF${generateId()}`);
+    setDepositId(null);
+    setDepositStatus('pending');
+    setAdminNote(null);
+    setStep('form');
+  };
+
   useEffect(() => {
-    if (!user?.id) return;
-    let active = true;
-    (async () => {
-      const { data } = await db.from('deposits')
-        .select('id, status, admin_note, reference')
-        .eq('user_id', user.id)
-        .eq('status', 'pending')
-        .eq('note', 'RPC Purchase')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (!active || !data) return;
-      setDepositId(data.id);
-      setDepositStatus(data.status);
-      setAdminNote(data.admin_note);
-      setReferenceId(data.reference);
-      setStep('review');
-    })();
-    return () => { active = false; };
-  }, [user?.id]);
+    if (!loading && !user) navigate('/', { replace: true });
+  }, [loading, user, navigate]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -178,7 +159,6 @@ const BuyRPC: React.FC = () => {
   };
 
   if (!user) {
-    navigate('/');
     return null;
   }
 
@@ -187,12 +167,15 @@ const BuyRPC: React.FC = () => {
       <div className="p-4 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
-          <button 
-            onClick={() => step === 'form' ? navigate('/dashboard') : setStep('form')} 
-            className="p-2 rounded-lg bg-card hover:bg-muted transition-colors"
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Back"
+            onClick={() => step === 'form' || step === 'review' ? navigate('/dashboard') : resetPayment()}
+            className="rounded-lg bg-card hover:bg-muted"
           >
             <ArrowLeft size={20} />
-          </button>
+          </Button>
           <div>
             <h1 className="text-xl font-bold">
               {step === 'review' && depositStatus === 'approved'
@@ -430,9 +413,9 @@ const BuyRPC: React.FC = () => {
               <Clock className="w-10 h-10 text-yellow-500 animate-pulse" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-foreground">Processing — Under Review</h2>
+              <h2 className="text-2xl font-bold text-foreground">Payment is under review</h2>
               <p className="text-muted-foreground">
-                Your payment has been submitted. An admin will review it shortly.
+                Your receipt has been submitted.
               </p>
             </div>
             <div className="glass-card rounded-xl p-6 space-y-2">
@@ -508,15 +491,15 @@ const BuyRPC: React.FC = () => {
           </div>
         )}
 
-        {step === 'review' && depositStatus === 'rejected' && (
+        {step === 'review' && (depositStatus === 'rejected' || depositStatus === 'not_received') && (
           <div className="space-y-6 animate-scale-in text-center py-8">
             <div className="w-20 h-20 mx-auto rounded-full bg-destructive/20 flex items-center justify-center">
               <X className="w-10 h-10 text-destructive" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-destructive">Payment Rejected</h2>
+              <h2 className="text-2xl font-bold text-destructive">{depositStatus === 'not_received' ? 'Payment not received' : 'Payment Rejected'}</h2>
               <p className="text-muted-foreground">
-                {adminNote || 'Your payment could not be verified. Please contact support.'}
+                {adminNote || 'Your receipt is saved, but payment has not been verified. Contact support before sending another transfer.'}
               </p>
             </div>
             <div className="glass-card rounded-xl p-6 space-y-2">
