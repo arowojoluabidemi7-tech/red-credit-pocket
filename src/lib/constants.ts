@@ -67,6 +67,8 @@ export const RPC_PRICE = 8500;
 export const WELCOME_BONUS = 160000;
 export const CLAIM_AMOUNT = 30000;
 export const CLAIM_INTERVAL = 30 * 60 * 1000; // 30 minutes
+export const MIN_WITHDRAWAL = 5000;
+export const REFERRAL_BONUS = 5000;
 
 export const VALID_RPC_CODE = 'RPC678910';
 export const INVALID_RPC_CODE = 'RPC708901';
