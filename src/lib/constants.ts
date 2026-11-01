@@ -87,3 +87,11 @@ export const COMMUNITY = {
   whatsapp: 'https://chat.whatsapp.com/KF5ssSgIExxBV1hop1cDX0?s=cl&p=a&mlu=4&ilr=4&iam=2',
   telegram: 'https://t.me/+u2HNi8g42lQwMDJk',
 };
+
+// Convert a local WhatsApp number (e.g. 08152339810) to wa.me international format (2348152339810)
+export const normalizeWhatsapp = (raw: string): string => {
+  const digits = raw.replace(/[^0-9]/g, '');
+  if (digits.startsWith('234')) return digits;
+  if (digits.startsWith('0')) return '234' + digits.slice(1);
+  return digits;
+};

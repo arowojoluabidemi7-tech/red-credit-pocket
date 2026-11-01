@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/PageContainer';
 import { usePaymentDetails } from '@/hooks/usePaymentDetails';
+import { normalizeWhatsapp } from '@/lib/constants';
 import { ArrowLeft, MessageCircle, Send, Mail, Clock, Headphones, ExternalLink } from 'lucide-react';
 
 const Support: React.FC = () => {
