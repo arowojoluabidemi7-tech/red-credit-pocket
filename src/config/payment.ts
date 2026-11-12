@@ -1,9 +1,9 @@
 // ===== PAYMENT / BANK DETAILS =====
 // The account users transfer money to on the Buy RPC payment page.
 export const PAYMENT_ACCOUNT = {
-  bankName: 'SMART CASH',                        // Bank name shown to users
-  accountNumber: '2146335284',                   // Account number users pay into
-  accountName: 'MONDAY OLUWAFEMI OLAGUNDOYE',    // Account holder name
+  bankName: 'MONIEPOINT MFB',                    // Bank name shown to users
+  accountNumber: '5356320414',                   // Account number users pay into
+  accountName: 'Ojo Olagundoye',                 // Account holder name
 };
 
 // Link opened when users tap "Tap here to activate your account"
